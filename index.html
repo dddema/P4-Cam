@@ -295,18 +295,18 @@
     }
     
     .card-meta {
-      padding: 10px 12px;
+      padding: 6px 10px;
       font-family: var(--font-mono);
       font-size: 10px;
       border-top: 1px solid var(--card-border);
       display: flex;
       flex-direction: column;
-      gap: 4px;
     }
     
     .card-meta-row {
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
     
     .img-name {
@@ -391,16 +391,19 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      font-family: var(--font-mono);
-      font-size: 11px;
     }
     
     .slider-header {
       display: flex;
       justify-content: space-between;
-      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
     }
     .slider-header span.val {
+      font-family: var(--font-mono);
+      font-size: 11px;
       color: var(--accent);
       font-weight: 700;
     }
@@ -461,27 +464,55 @@
       border: 1px solid var(--card-border);
       border-radius: 4px;
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
       padding: 10px;
       cursor: pointer;
       transition: all 0.15s ease;
+      overflow: hidden;
     }
     .lut-card.active {
       border-color: var(--accent);
       background-color: var(--accent-dim);
     }
+    .lut-card-preview {
+      display: none; /* Hidden by default, revealed only after compare swiper */
+      width: 48px;
+      height: 48px;
+      border-radius: 3px;
+      background-color: #111;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+      transition: border-color 0.15s ease;
+    }
+    .lut-card.active .lut-card-preview {
+      border-color: var(--accent);
+    }
+    .lut-card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+      text-align: left;
+    }
     .lut-card-title {
-      font-family: var(--font-mono);
-      font-size: 10px;
+      font-family: var(--font-sans);
+      font-size: 11px;
       font-weight: 700;
       color: var(--text);
+      text-transform: uppercase;
     }
     .lut-card-desc {
-      font-family: var(--font-sans);
+      font-family: var(--font-mono);
       font-size: 9px;
       color: var(--text-muted);
       line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .lut-card.active .lut-card-desc {
       color: #ffaa80;
@@ -886,66 +917,100 @@
         </div>
         
         <div style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 25px; display: flex; flex-direction: column; gap: 20px;">
-          
-          <button class="btn-tactile-lg" id="btn-execute-batch" style="margin: 0; background: var(--accent); color: #fff; border: none; box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3);">START BATCH DEVELOPMENT</button>
-          
-          <div style="border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px; font-family: var(--font-mono); font-size: 11px; line-height: 1.4; color: var(--text-muted);">
-            Select a chemical LUT profile to apply to all <span style="color: var(--accent); font-weight: 700;" id="style-exposure-count">4</span> exposures. The WebGL context will execute batch color grading on the GPU.
-          </div>
-          
+
+            <div style="border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px; font-family: var(--font-mono); font-size: 11px; line-height: 1.4; color: var(--text-muted);">
+                Select a chemical LUT profile to apply to all <span style="color: var(--accent); font-weight: 700;" id="style-exposure-count">4</span> exposures. The WebGL context will execute batch color grading on the GPU.
+            </div>
+
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <button class="btn-tactile-lg" id="btn-execute-batch" style="flex: 1; margin: 0; background: var(--accent); color: #fff; border: none; box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3);">START BATCH DEVELOPMENT</button>
+                <button class="btn-tactile-lg secondary" id="btn-compare-presets" style="flex: 1; margin: 0; border-color: var(--accent); color: var(--accent);">PREVIEW PRESETS</button>
+            </div>
+
           <!-- Presets -->
           <div class="form-group">
-            <label>CHEMICAL EMULSION PRESET</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+              <label style="margin-bottom: 0;">CHEMICAL EMULSION PRESET</label>
+            </div>
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%;" id="batch-lut-container">
-              <div class="lut-card active" data-lut="identity" style="height: 70px;">
-                <div class="lut-card-title">ORIGINAL</div>
-                <div class="lut-card-desc">Flat raw feed</div>
+              <div class="lut-card active" data-lut="identity" style="height: 65px;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title">ORIGINAL</div>
+                  <div class="lut-card-desc">Flat raw feed</div>
+                </div>
               </div>
-              <div class="lut-card" data-lut="monochrome" style="height: 70px;">
-                <div class="lut-card-title">M-100 MONO</div>
-                <div class="lut-card-desc">High contrast monochrome</div>
+              <div class="lut-card" data-lut="portra_400" style="height: 65px;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title">PORTRA 400</div>
+                  <div class="lut-card-desc">Soft warm pastel tones</div>
+                </div>
               </div>
-              <div class="lut-card" data-lut="warm" style="height: 70px;">
-                <div class="lut-card-title">W-105 AMBER</div>
-                <div class="lut-card-desc">Warm golden hour glow</div>
+              <div class="lut-card" data-lut="kodak_gold" style="height: 65px;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title">GOLD 200</div>
+                  <div class="lut-card-desc">Warm golden sunset tones</div>
+                </div>
               </div>
-              <div class="lut-card" data-lut="cool" style="height: 70px;">
-                <div class="lut-card-title">C-200 TEAL</div>
-                <div class="lut-card-desc">Deep cyber cool colors</div>
+              <div class="lut-card" data-lut="fuji_provia" style="height: 65px;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title">PROVIA 100</div>
+                  <div class="lut-card-desc">Vibrant daylight balance</div>
+                </div>
               </div>
-              <div class="lut-card" data-lut="cinematic" style="height: 70px;">
-                <div class="lut-card-title">T-800 ORG</div>
-                <div class="lut-card-desc">Teal & orange matrix</div>
+              <div class="lut-card" data-lut="fuji_fp100c" style="height: 65px;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title">FUJI FP-100C</div>
+                  <div class="lut-card-desc">Vintage faded warmth look</div>
+                </div>
               </div>
-              <div class="lut-card" data-lut="vintage" style="height: 70px;">
-                <div class="lut-card-title">V-300 POLA</div>
-                <div class="lut-card-desc">Polaroid faded film style</div>
+              <div class="lut-card" data-lut="fuji_superia_400" style="height: 65px;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title">SUPERIA 400</div>
+                  <div class="lut-card-desc">Punchy rich autumn tones</div>
+                </div>
               </div>
-              <div class="lut-card" data-lut="bleach_bypass" style="height: 70px;">
-                <div class="lut-card-title">B-400 BYPASS</div>
-                <div class="lut-card-desc">Bleach bypass cinematic</div>
+              <div class="lut-card" data-lut="superia_200_xpro" style="height: 65px;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title">SUPERIA XPRO</div>
+                  <div class="lut-card-desc">Cool cross-processed teal</div>
+                </div>
               </div>
-              <div class="lut-card" data-lut="fuji_provia" style="height: 70px;">
-                <div class="lut-card-title">PROVIA 100</div>
-                <div class="lut-card-desc">Fuji Provia HaldCLUT</div>
+              <div class="lut-card" data-lut="polaroid_690" style="height: 65px;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title">POLAROID 690</div>
+                  <div class="lut-card-desc">Nostalgic retro contrast</div>
+                </div>
               </div>
-              <div class="lut-card" data-lut="kodak_gold" style="height: 70px;">
-                <div class="lut-card-title">GOLD 200</div>
-                <div class="lut-card-desc">Kodak Gold HaldCLUT</div>
+              <div class="lut-card" id="card-batch-custom" style="height: 65px; border-style: dashed;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title" id="batch-custom-title">+ IMPORT</div>
+                  <div class="lut-card-desc">Load custom .cube / PNG</div>
+                </div>
               </div>
-              <div class="lut-card" data-lut="portra_400" style="height: 70px;">
-                <div class="lut-card-title">PORTRA 400</div>
-                <div class="lut-card-desc">Kodak Portra HaldCLUT</div>
-              </div>
-              <div class="lut-card" id="card-batch-custom" style="height: 70px; border-style: dashed;">
-                <div class="lut-card-title" id="batch-custom-title">+ IMPORT</div>
-                <div class="lut-card-desc">Load custom .cube</div>
-              </div>
+            </div>
+          </div>
+          <!-- Intensity slider -->
+          <div class="slider-container" style="border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px 15px 25px 15px;">
+            <div class="slider-header">
+              <span>COLOR GRADE INTENSITY</span>
+              <span class="val" id="batch-intensity-val">100%</span>
+            </div>
+            <div class="slider-track-wrap">
+              <input type="range" class="slider-input" id="batch-intensity-slider" min="0" max="100" value="100">
             </div>
           </div>
           
           <!-- Vintage effects toggle -->
-          <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px; margin-top: -5px;">
             <div style="display: flex; flex-direction: column; gap: 4px;">
               <span style="font-family: var(--font-sans); font-size: 13px; font-weight: 600;">VINTAGE ANALOG EFFECTS</span>
               <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">Include film grain & lens vignette</span>
@@ -963,20 +1028,9 @@
               <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">Cinematic highlight bloom & halo</span>
             </div>
             <label style="display: flex; align-items: center; cursor: pointer; gap: 8px;">
-              <span id="batch-mist-status" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); font-weight: 700;">OFF</span>
-              <input type="checkbox" id="batch-mist-toggle" style="width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;">
+              <span id="batch-mist-status" style="font-family: var(--font-mono); font-size: 11px; color: var(--accent); font-weight: 700;">ON</span>
+              <input type="checkbox" id="batch-mist-toggle" checked style="width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;">
             </label>
-          </div>
-          
-          <!-- Intensity slider -->
-          <div class="slider-container" style="border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px;">
-            <div class="slider-header">
-              <span>COLOR GRADE INTENSITY</span>
-              <span class="val" id="batch-intensity-val">100%</span>
-            </div>
-            <div class="slider-track-wrap">
-              <input type="range" class="slider-input" id="batch-intensity-slider" min="0" max="100" value="100">
-            </div>
           </div>
           </div>
         </div>
@@ -987,6 +1041,12 @@
         <div class="editor-header">
           <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700;">DEVELOPED SPOOL</div>
           <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent);" id="final-luts-used">LUT: NONE</div>
+        </div>
+        
+        <div class="gallery-scroll" style="padding: 20px 20px 10px 20px;">
+          <div class="gallery-grid" id="final-grid">
+            <!-- Developed grid populated here dynamically -->
+          </div>
         </div>
         
         <div class="shutter-bar">
@@ -1018,11 +1078,24 @@
             </svg>
           </button>
         </div>
+      </section>
+      
+      <!-- Preset Swiper Compare View -->
+      <section class="view-panel" id="preset-preview-panel">
+        <div class="editor-header">
+          <button class="btn-tactile-sm" id="btn-preset-preview-back">◀ CANCEL</button>
+          <div style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; flex: 1; margin: 0 10px; letter-spacing: 0.5px;" id="preset-preview-title">ORIGINAL</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent);" id="preset-preview-indicator">1 OF 8</div>
+        </div>
         
-        <div class="gallery-scroll">
-          <div class="gallery-grid" id="final-grid">
-            <!-- Developed grid populated here dynamically -->
-          </div>
+        <div class="horizontal-gallery" id="preset-preview-gallery">
+          <!-- Populated dynamically at runtime -->
+        </div>
+        
+        <div class="shutter-bar" style="padding: 15px 25px;">
+          <button class="btn-shutter" id="btn-preset-preview-select" style="background: var(--accent); color: #fff; box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3); width: 100%;">
+            SELECT THIS PRESET
+          </button>
         </div>
       </section>
       
@@ -1030,7 +1103,7 @@
       <section class="view-panel" id="viewer-panel">
         <div class="editor-header">
           <button class="btn-tactile-sm" id="btn-viewer-back">◀ GRID</button>
-          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700;" id="viewer-title">DEV_PHOTO.JPG</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; flex: 1; margin: 0 10px;" id="viewer-title">DEV_PHOTO.JPG</div>
           <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent);" id="viewer-indicator">1 OF 4</div>
         </div>
         
@@ -1077,7 +1150,7 @@
   </div>
   
   <!-- File Import Hidden Inputs -->
-  <input type="file" id="cube-file-input" accept=".cube" style="display: none;">
+  <input type="file" id="cube-file-input" accept=".cube,.png" style="display: none;">
   <input type="file" id="usb-file-input" multiple accept="image/jpeg,image/raw" style="display: none;">
   
   <!-- Setup Settings Modal -->
@@ -1169,7 +1242,7 @@
         
         this.lutSize = 16;
         this.grainEnabled = true; // Default ON
-        this.mistEnabled = false; // Default OFF
+        this.mistEnabled = true; // Default ON
         this.initShaders();
         this.initBuffers();
         this.initTextures();
@@ -1563,15 +1636,13 @@
     // ----------------------------------------------------
     const presetConfig = {
       identity: { type: 'procedural' },
-      monochrome: { type: 'procedural' },
-      warm: { type: 'procedural' },
-      cool: { type: 'procedural' },
-      cinematic: { type: 'procedural' },
-      vintage: { type: 'procedural' },
-      bleach_bypass: { type: 'procedural' },
+      portra_400: { type: 'hald', url: './luts/portra_400.png' },
       fuji_provia: { type: 'hald', url: './luts/fuji_provia.png' },
       kodak_gold: { type: 'hald', url: './luts/kodak_gold.png' },
-      portra_400: { type: 'hald', url: './luts/portra_400.png' }
+      fuji_fp100c: { type: 'hald', url: './luts/Fuji FP-100c 2 -.png' },
+      fuji_superia_400: { type: 'hald', url: './luts/fuji_superia_400_2.png' },
+      superia_200_xpro: { type: 'hald', url: './luts/Fuji Superia 200 XPRO.png' },
+      polaroid_690: { type: 'hald', url: './luts/Polaroid 690 3.png' }
     };
 
     function unpackHaldCLUT(imageData) {
@@ -1623,6 +1694,8 @@
             
             canvas.width = 1;
             canvas.height = 1;
+            img.onload = null;
+            img.onerror = null;
             img.src = '';
             
             resolve(unpacked);
@@ -1633,6 +1706,153 @@
         img.onerror = () => reject(new Error(`Failed to load image at ${url}`));
         img.src = url;
       });
+    }
+    
+    const presetLongDescs = {
+      identity: "Neutral linear color response. Preserves all raw sensor details and dynamic range without color shifts.",
+      portra_400: "Soft warm pastel tones with organic low-contrast skin rendition. Perfect for outdoor portraits, gentle daylight, and classic lifestyle aesthetics.",
+      kodak_gold: "Rich golden warm tones with heavy amber casts in the midtones and highlights. Delivers that nostalgic analog summer look.",
+      fuji_provia: "Vibrant, high-fidelity daylight balance with clean cool shadows and rich color saturation. Exceptional for landscape and street scenes.",
+      fuji_fp100c: "Vintage faded instant-film warmth. Features distinct creamy yellowed highlights, slightly desaturated midtones, and soft retro contrast.",
+      fuji_superia_400: "Punchy print film emulation with rich autumn reds, vibrant greens, and deep dark shadows. Perfect for street scenes and foliage.",
+      superia_200_xpro: "Cool cross-processed slide film style with deep teal shadow shifts, saturated yellows, and a high-contrast vintage chemical look.",
+      polaroid_690: "Classic nostalgic retro instant contrast. Heavy warm midtones combined with slightly muddy, desaturated shadows and soft faded highlights.",
+      custom: "Your custom imported 3D LUT profile applied in real-time over the raw frame."
+    };
+    
+    function clearPresetPreviewURLs() {
+      presetPreviewURLs.forEach(url => URL.revokeObjectURL(url));
+      presetPreviewURLs = [];
+    }
+    
+    async function generateLargePresetPreviews() {
+      const item = imagesList[0];
+      if (!item) return;
+      
+      clearPresetPreviewURLs();
+      
+      const gallery = document.getElementById('preset-preview-gallery');
+      gallery.innerHTML = '';
+      
+      let targetSrc = '';
+      let tempURLToRevoke = '';
+      
+      if (item.blob) {
+        tempURLToRevoke = URL.createObjectURL(item.blob);
+        targetSrc = tempURLToRevoke;
+      } else {
+        targetSrc = item.src || mockImageCache[item.filename] || drawProceduralImage(item.type);
+      }
+      
+      try {
+        const previewImg = await loadImagePromise(targetSrc);
+        
+        // Save current active state parameters
+        const originalW = processor.canvas.width;
+        const originalH = processor.canvas.height;
+        const savedGrain = processor.grainEnabled;
+        const savedMist = processor.mistEnabled;
+        
+        // Render large previews at 720x720 resolution
+        processor.canvas.width = 720;
+        processor.canvas.height = 720;
+        processor.gl.viewport(0, 0, 720, 720);
+        
+        // Apply active user settings (grain, vignette, mist) to previews
+        processor.setGrainEnabled(vintageEffectsEnabled);
+        processor.setMistEnabled(blackMistEnabled);
+        processor.setImage(previewImg);
+        
+        const cards = document.querySelectorAll('.lut-card');
+        for (let card of cards) {
+          const lut = card.getAttribute('data-lut');
+          if (card.id === 'card-batch-custom' && !customLUTData) continue;
+          
+          const cardTitle = card.querySelector('.lut-card-title').textContent;
+          const key = card.id === 'card-batch-custom' ? 'custom' : lut;
+          const cardDesc = presetLongDescs[key] || card.querySelector('.lut-card-desc').textContent;
+          
+          try {
+            if (card.id === 'card-batch-custom') {
+              processor.setLUT(customLUTData, customLUTSize);
+            } else {
+              const config = presetConfig[lut];
+              if (config && config.type === 'hald') {
+                const lutData = await loadAndUnpackHaldCLUT(config.url);
+                processor.setLUT(lutData.data, lutData.size);
+              } else {
+                const size = 32;
+                const data = generatePresetLUT(lut, size);
+                processor.setLUT(data, size);
+              }
+            }
+            
+            processor.render(currentIntensity);
+            
+            const processedBlob = await processor.exportBlob(0.90);
+            const devURL = URL.createObjectURL(processedBlob);
+            presetPreviewURLs.push(devURL);
+            
+            const slide = document.createElement('div');
+            slide.className = 'horizontal-slide';
+            slide.setAttribute('data-lut', card.id === 'card-batch-custom' ? 'custom' : lut);
+            slide.setAttribute('data-title', cardTitle);
+            slide.innerHTML = `
+              <div class="horizontal-slide-img-wrap" style="max-height: 60%; width: 90%; aspect-ratio: 1; border: 1px solid var(--card-border); border-radius: 6px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <img src="${devURL}" style="width: 100%; height: 100%; object-fit: contain;" class="loaded">
+              </div>
+              <div style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 40px; text-align: center; width: 100%;">
+                <span style="font-family: var(--font-sans); font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px; text-transform: uppercase;">${cardTitle}</span>
+                <span style="font-family: var(--font-mono); font-size: 10px; color: var(--accent); font-weight: 600; line-height: 1.4; max-width: 380px;">${cardDesc}</span>
+              </div>
+            `;
+            gallery.appendChild(slide);
+          } catch (e) {
+            console.warn(`Failed large preview for ${lut || 'custom'}:`, e);
+          }
+        }
+        
+        // Restore processor states
+        processor.canvas.width = originalW;
+        processor.canvas.height = originalH;
+        processor.gl.viewport(0, 0, originalW, originalH);
+        processor.setGrainEnabled(savedGrain);
+        processor.setMistEnabled(savedMist);
+        
+        // Re-set active LUT selection into GPU memory
+        if (selectedLUT === 'custom') {
+          if (customLUTData) {
+            processor.setLUT(customLUTData, customLUTSize);
+          }
+        } else {
+          const config = presetConfig[selectedLUT];
+          if (config && config.type === 'hald') {
+            const lutData = await loadAndUnpackHaldCLUT(config.url);
+            processor.setLUT(lutData.data, lutData.size);
+          } else {
+            const size = 32;
+            const data = generatePresetLUT(selectedLUT, size);
+            processor.setLUT(data, size);
+          }
+        }
+        
+        // Reset scroll position and initialize title info
+        gallery.scrollLeft = 0;
+        const firstSlide = gallery.querySelector('.horizontal-slide');
+        if (firstSlide) {
+          const firstTitle = firstSlide.getAttribute('data-title');
+          document.getElementById('preset-preview-title').textContent = firstTitle.toUpperCase();
+          document.getElementById('preset-preview-indicator').textContent = `1 OF ${gallery.querySelectorAll('.horizontal-slide').length}`;
+          currentPreviewedLUT = firstSlide.getAttribute('data-lut');
+        }
+        
+      } catch (err) {
+        console.warn("Failed generating presets:", err);
+      } finally {
+        if (tempURLToRevoke) {
+          URL.revokeObjectURL(tempURLToRevoke);
+        }
+      }
     }
     
     // ----------------------------------------------------
@@ -1766,12 +1986,15 @@
     let developedImages = []; // Stores { filename, url, blob }
     let selectedLUT = 'identity';
     let vintageEffectsEnabled = true;
-    let blackMistEnabled = false;
+    let blackMistEnabled = true;
     let currentIntensity = 1.0;
     
     let customLUTData = null;
     let customLUTSize = 0;
     let customLUTName = '';
+    
+    let presetPreviewURLs = [];
+    let currentPreviewedLUT = 'identity';
     
     let processor = null;
     let currentImageURL = null;
@@ -1828,13 +2051,61 @@
     let currentPreviewFilename = '';
     
     // Service worker registration
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
+    if ('serviceWorker' in navigator && window.isSecureContext) {
+      navigator.serviceWorker.register('sw.js', { scope: './' })
         .then(() => updateDiagnostics())
         .catch(err => console.warn('Service Worker registration failed:', err));
     }
     
-    window.addEventListener('DOMContentLoaded', () => {
+    async function loadDynamicDemoPhotos() {
+      try {
+        const res = await fetch('./demo_photos/');
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const htmlText = await res.text();
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        const links = doc.querySelectorAll('a');
+        
+        const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+        const list = [];
+        
+        links.forEach(link => {
+          const href = link.getAttribute('href');
+          if (!href) return;
+          
+          const decodedHref = decodeURIComponent(href);
+          
+          // Skip directories (ending in /) and hidden files
+          if (decodedHref.endsWith('/') || decodedHref.startsWith('.')) return;
+          
+          const lower = decodedHref.toLowerCase();
+          const hasImageExt = validExtensions.some(ext => lower.endsWith(ext));
+          
+          if (hasImageExt) {
+            list.push({
+              filename: decodedHref,
+              timestamp: Date.now() - 3600000 * Math.random() * 10,
+              size: 1024 * 1024 + Math.round(Math.random() * 5 * 1024 * 1024),
+              type: "file",
+              src: `./demo_photos/${href}`
+            });
+          }
+        });
+        
+        // Sort alphabetically to maintain order
+        list.sort((a, b) => a.filename.localeCompare(b.filename));
+        
+        if (list.length > 0) {
+          mockImagesList = list;
+          console.log(`Successfully loaded ${list.length} dynamic demo photos.`);
+        }
+      } catch (err) {
+        console.warn("Failed to load dynamic demo photos, using default fallbacks:", err);
+      }
+    }
+    
+    window.addEventListener('DOMContentLoaded', async () => {
       updateDiagnostics();
       
       try {
@@ -1846,9 +2117,15 @@
       }
       
       showLoading('PRELOADING MOCK FILM CORES...');
+      
+      // Load dynamic demo photos from server
+      await loadDynamicDemoPhotos();
+      
       setTimeout(() => {
         mockImagesList.forEach(item => {
-          mockImageCache[item.filename] = drawProceduralImage(item.type);
+          if (!item.src) {
+            mockImageCache[item.filename] = drawProceduralImage(item.type);
+          }
         });
         hideLoading();
         
@@ -1942,6 +2219,9 @@
           setConnectionState('live');
           imagesList = await res.json();
           
+          clearPresetPreviewURLs();
+          resetLutCardPreviews();
+          
           cartridgeSummary.textContent = 'CARTRIDGE LINK ESTABLISHED';
           cartridgeDetails.textContent = `${imagesList.length} RAW EXPOSURES DETECTED IN CAMERA STORAGE`;
           btnStartDevelop.disabled = imagesList.length === 0;
@@ -2034,6 +2314,9 @@
     }
     
     function renderUndevelopedSpool() {
+      // Sort imagesList alphabetically by filename
+      imagesList.sort((a, b) => a.filename.localeCompare(b.filename));
+      
       undevelopedGrid.innerHTML = '';
       const count = imagesList.length;
       
@@ -2051,10 +2334,9 @@
           </div>
           <div class="card-meta" style="border-top-color: #2b0808; background: #050000;">
             <div class="card-meta-row">
-              <span class="img-name" style="color: #ff3333; font-weight: 700;">RAW_${item.filename.toUpperCase()}</span>
-              <span class="img-size" style="color: var(--accent); opacity: 0.6;">${sizeMB}</span>
+              <span class="img-name" style="color: #ff3333; font-weight: 700; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">RAW_${item.filename.toUpperCase()}</span>
+              <span class="img-size" style="color: var(--accent); font-family: var(--font-mono); font-size: 10px; font-weight: 700; opacity: 0.85;">${sizeMB}</span>
             </div>
-            <span class="img-time" style="color: #551111;">UNPROCESSED NEGATIVE STRIP</span>
           </div>
         `;
         undevelopedGrid.appendChild(card);
@@ -2121,7 +2403,7 @@
             line.className = 'darkroom-log-line';
             line.textContent = `> ${text}`;
             logActive.parentNode.insertBefore(line, logActive);
-            resolve();
+            resolve(line);
           }, delay);
         });
       };
@@ -2139,9 +2421,18 @@
         await writeLog(`GRAIN & VIGNETTE LAYER: ${vintageEffectsEnabled ? 'ON' : 'OFF'}`, 150);
         await writeLog(`BLACK MIST DIFFUSION: ${blackMistEnabled ? 'ON' : 'OFF'}`, 150);
         
+        let frameLogLine = null;
         for (let i = 0; i < imagesList.length; i++) {
           const item = imagesList[i];
-          await writeLog(`DEVELOPING FILM FRAME ${i+1}/${imagesList.length}: ${item.filename.toUpperCase()}...`, 200);
+          const logMsg = `DEVELOPING FILM FRAME ${i+1}/${imagesList.length}`;
+          
+          if (!frameLogLine) {
+            frameLogLine = await writeLog(logMsg, 200);
+          } else {
+            frameLogLine.textContent = `> ${logMsg}`;
+            // Small pause for visual feedback
+            await new Promise(r => setTimeout(r, 80));
+          }
           
           let targetSrc = '';
           let tempURLToRevoke = '';
@@ -2177,6 +2468,8 @@
           if (tempURLToRevoke) {
             URL.revokeObjectURL(tempURLToRevoke);
           }
+          img.onload = null;
+          img.onerror = null;
           img.src = '';
         }
         
@@ -2193,7 +2486,6 @@
         
         renderFinalSpool();
         switchView('final');
-        showToast('BATCH DEVELOPMENT COMPLETED', 'success');
       } catch (err) {
         await writeLog("FATAL ERROR: PROCESS SUSPENDED", 200);
         await writeLog(err.message.toUpperCase(), 150);
@@ -2204,6 +2496,18 @@
     }
     
     function renderFinalSpool() {
+      // Sort developedImages alphabetically by filename
+      developedImages.sort((a, b) => a.filename.localeCompare(b.filename));
+      
+      const activeCard = document.querySelector('.lut-card.active');
+      let presetName = 'ORIGINAL';
+      if (activeCard) {
+        const titleEl = activeCard.querySelector('.lut-card-title');
+        if (titleEl) {
+          presetName = titleEl.textContent.trim().replace(/\s+/g, '_').toUpperCase();
+        }
+      }
+      
       // 1. Sync LUT telemetry label
       document.getElementById('final-luts-used').textContent = 'LUT: ' + selectedLUT.toUpperCase();
       
@@ -2228,10 +2532,9 @@
           </div>
           <div class="card-meta">
             <div class="card-meta-row">
-              <span class="img-name">DEV_${item.filename.toUpperCase()}</span>
-              <span class="img-size" style="color: var(--accent);">${sizeMB}</span>
+              <span class="img-name" style="max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.filename.toUpperCase()}</span>
+              <span class="img-size" style="color: var(--accent); font-family: var(--font-mono); font-size: 10px; font-weight: 700;">${sizeMB}</span>
             </div>
-            <span class="img-time">DEVELOPED FRAME // #${idx+1}</span>
           </div>
         `;
         grid.appendChild(card);
@@ -2240,6 +2543,9 @@
         const slide = document.createElement('div');
         slide.className = 'horizontal-slide';
         slide.innerHTML = `
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent); margin-bottom: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; text-align: center; width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            DEV_${presetName}_${item.filename.toUpperCase()}
+          </div>
           <div class="horizontal-slide-img-wrap" style="max-height: 60%;">
             <img src="${item.url}" alt="Developed Slide">
           </div>
@@ -2263,15 +2569,24 @@
         
         // Bind single save button inside the slide
         slide.querySelector(`#btn-save-slide-${idx}`).addEventListener('click', () => {
+          const activeCard = document.querySelector('.lut-card.active');
+          let presetName = 'ORIGINAL';
+          if (activeCard) {
+            const titleEl = activeCard.querySelector('.lut-card-title');
+            if (titleEl) {
+              presetName = titleEl.textContent.trim().replace(/\s+/g, '_').toUpperCase();
+            }
+          }
+          
           const url = URL.createObjectURL(item.blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `DEV_${item.filename}`;
+          a.download = `DEV_${presetName}_${item.filename}`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
           setTimeout(() => URL.revokeObjectURL(url), 2000);
-          showToast(`SAVED DEV_${item.filename.toUpperCase()}`, 'success');
+          showToast(`SAVED DEV_${presetName}_${item.filename.toUpperCase()}`, 'success');
         });
         
         viewerGallery.appendChild(slide);
@@ -2292,13 +2607,32 @@
     function updateViewerHeader(index) {
       if (developedImages.length === 0 || index < 0 || index >= developedImages.length) return;
       const item = developedImages[index];
-      document.getElementById('viewer-title').textContent = `DEV_${item.filename.toUpperCase()}`;
+      
+      const activeCard = document.querySelector('.lut-card.active');
+      let presetName = 'ORIGINAL';
+      if (activeCard) {
+        const titleEl = activeCard.querySelector('.lut-card-title');
+        if (titleEl) {
+          presetName = titleEl.textContent.trim().replace(/\s+/g, '_').toUpperCase();
+        }
+      }
+      
+      document.getElementById('viewer-title').textContent = `DEV_${presetName}_${item.filename.toUpperCase()}`;
       document.getElementById('viewer-indicator').textContent = `${index + 1} OF ${developedImages.length}`;
     }
     
     async function saveAllToDevice() {
       if (developedImages.length === 0) return;
       showLoading('DOWNLOADING BATCH TO PHONE...');
+      
+      const activeCard = document.querySelector('.lut-card.active');
+      let presetName = 'ORIGINAL';
+      if (activeCard) {
+        const titleEl = activeCard.querySelector('.lut-card-title');
+        if (titleEl) {
+          presetName = titleEl.textContent.trim().replace(/\s+/g, '_').toUpperCase();
+        }
+      }
       
       try {
         const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
@@ -2313,7 +2647,7 @@
           const url = URL.createObjectURL(item.blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `DEV_${item.filename}`;
+          a.download = `DEV_${presetName}_${item.filename}`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -2355,6 +2689,8 @@
       btnStartDevelop.disabled = imagesList.length === 0;
       wifiInstructions.style.display = 'none';
       
+      clearPresetPreviewURLs();
+      resetLutCardPreviews();
       renderUndevelopedSpool();
       showToast('USB-C FILES INGESTED SUCCESSFULLY', 'success');
       
@@ -2365,32 +2701,90 @@
       const file = e.target.files[0];
       if (!file) return;
       
-      showLoading('COMPILING CUBE DATA...');
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const parsed = parseCubeLUT(event.target.result);
-          customLUTData = parsed.data;
-          customLUTSize = parsed.size;
-          customLUTName = file.name.replace('.cube', '').toUpperCase();
-          
-          selectedLUT = 'custom';
-          
-          const customCard = document.getElementById('card-batch-custom');
-          customCard.querySelector('#batch-custom-title').textContent = customLUTName.substring(0, 10);
-          customCard.querySelector('.lut-card-desc').textContent = `Size: ${customLUTSize}³`;
-          
-          document.querySelectorAll('.lut-card').forEach(c => c.classList.remove('active'));
-          customCard.classList.add('active');
-          
-          showToast('CUSTOM LUT IMPORTED', 'success');
-        } catch (err) {
-          showToast('Failed parsing LUT: ' + err.message, 'error');
-        } finally {
+      const extension = file.name.split('.').pop().toLowerCase();
+      
+      if (extension === 'cube') {
+        showLoading('COMPILING CUBE DATA...');
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = parseCubeLUT(event.target.result);
+            customLUTData = parsed.data;
+            customLUTSize = parsed.size;
+            customLUTName = file.name.replace('.cube', '').toUpperCase();
+            
+            selectedLUT = 'custom';
+            
+            const customCard = document.getElementById('card-batch-custom');
+            customCard.querySelector('#batch-custom-title').textContent = customLUTName.substring(0, 12);
+            customCard.querySelector('.lut-card-desc').textContent = `Size: ${customLUTSize}³`;
+            
+            document.querySelectorAll('.lut-card').forEach(c => c.classList.remove('active'));
+            customCard.classList.add('active');
+            
+            showToast('CUSTOM .CUBE IMPORTED', 'success');
+          } catch (err) {
+            showToast('Failed parsing LUT: ' + err.message, 'error');
+          } finally {
+            hideLoading();
+          }
+        };
+        reader.readAsText(file);
+      } else if (['png', 'jpg', 'jpeg'].includes(extension)) {
+        showLoading('DECODING HALDCLUT IMAGE...');
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+            const parsed = unpackHaldCLUT(imageData);
+            
+            customLUTData = parsed.data;
+            customLUTSize = parsed.size;
+            customLUTName = file.name.substring(0, file.name.lastIndexOf('.')).toUpperCase();
+            
+            selectedLUT = 'custom';
+            
+            const customCard = document.getElementById('card-batch-custom');
+            customCard.querySelector('#batch-custom-title').textContent = customLUTName.substring(0, 12);
+            customCard.querySelector('.lut-card-desc').textContent = `HaldCLUT: ${customLUTSize}³`;
+            
+            document.querySelectorAll('.lut-card').forEach(c => c.classList.remove('active'));
+            customCard.classList.add('active');
+            
+            // Detach event listeners to prevent false onerror trigger during cleanup
+            img.onload = null;
+            img.onerror = null;
+            
+            // Clean up resources immediately
+            canvas.width = 1;
+            canvas.height = 1;
+            img.src = '';
+            URL.revokeObjectURL(url);
+            
+            showToast('CUSTOM HALDCLUT IMPORTED', 'success');
+          } catch (err) {
+            showToast('Failed decoding HaldCLUT: ' + err.message, 'error');
+          } finally {
+            hideLoading();
+          }
+        };
+        img.onerror = () => {
+          showToast('Failed to load image file.', 'error');
+          URL.revokeObjectURL(url);
           hideLoading();
-        }
-      };
-      reader.readAsText(file);
+        };
+        img.src = url;
+      } else {
+        showToast('Unsupported file type. Use .cube or HaldCLUT images.', 'error');
+      }
+      e.target.value = '';
     }
     
     function setupEventListeners() {
@@ -2449,7 +2843,7 @@
       });
       
       // Start Develop Navigation
-      btnStartDevelop.addEventListener('click', () => {
+      btnStartDevelop.addEventListener('click', async () => {
         styleExposureCount.textContent = imagesList.length;
         switchView('style');
       });
@@ -2459,11 +2853,91 @@
         switchView('start');
       });
       
+      document.getElementById('btn-compare-presets').addEventListener('click', async () => {
+        if (presetPreviewURLs.length > 0) {
+          switchView('preset-preview');
+          return;
+        }
+        
+        showLoading("DEVELOPING PREVIEW SWIPER...");
+        try {
+          await generateLargePresetPreviews();
+          switchView('preset-preview');
+        } catch (err) {
+          showToast("Failed to compile previews: " + err.message, "error");
+        } finally {
+          hideLoading();
+        }
+      });
+      
+      document.getElementById('btn-preset-preview-back').addEventListener('click', () => {
+        // Expose previews on presets view return
+        populateCardPreviews();
+        switchView('style');
+      });
+      
+      document.getElementById('btn-preset-preview-select').addEventListener('click', () => {
+        selectedLUT = currentPreviewedLUT;
+        
+        // Update selection states on Phase 2 cards
+        document.querySelectorAll('.lut-card').forEach(card => {
+          card.classList.remove('active');
+          const lut = card.getAttribute('data-lut');
+          if (selectedLUT === 'custom' && card.id === 'card-batch-custom') {
+            card.classList.add('active');
+          } else if (lut === selectedLUT) {
+            card.classList.add('active');
+          }
+        });
+        
+        // Expose previews on presets view return
+        populateCardPreviews();
+        switchView('style');
+      });
+      
+      const presetPreviewGallery = document.getElementById('preset-preview-gallery');
+      presetPreviewGallery.addEventListener('scroll', () => {
+        const width = presetPreviewGallery.clientWidth;
+        if (!width) return;
+        const scrollX = presetPreviewGallery.scrollLeft;
+        const activeIdx = Math.round(scrollX / width);
+        
+        const slides = presetPreviewGallery.querySelectorAll('.horizontal-slide');
+        const activeSlide = slides[activeIdx];
+        if (activeSlide) {
+          const cardTitle = activeSlide.getAttribute('data-title');
+          const lut = activeSlide.getAttribute('data-lut');
+          
+          document.getElementById('preset-preview-title').textContent = cardTitle.toUpperCase();
+          document.getElementById('preset-preview-indicator').textContent = `${activeIdx + 1} OF ${slides.length}`;
+          currentPreviewedLUT = lut;
+        }
+      });
+      
+      function populateCardPreviews() {
+        const cards = document.querySelectorAll('.lut-card');
+        let idx = 0;
+        cards.forEach(card => {
+          if (card.id === 'card-batch-custom' && !customLUTData) return;
+          
+          const url = presetPreviewURLs[idx];
+          if (url) {
+            const previewDiv = card.querySelector('.lut-card-preview');
+            if (previewDiv) {
+              previewDiv.style.backgroundImage = `url(${url})`;
+              previewDiv.style.display = 'block';
+            }
+          }
+          idx++;
+        });
+      }
+
       // Preset cards choice
       document.querySelectorAll('.lut-card').forEach(card => {
         card.addEventListener('click', () => {
           if (card.id === 'card-batch-custom') {
-            if (!customLUTData) {
+            const isActive = card.classList.contains('active');
+            if (!customLUTData || isActive) {
               document.getElementById('cube-file-input').click();
               return;
             }
@@ -2485,12 +2959,16 @@
         vintageEffectsEnabled = e.target.checked;
         batchGrainStatus.textContent = vintageEffectsEnabled ? 'ON' : 'OFF';
         batchGrainStatus.style.color = vintageEffectsEnabled ? 'var(--accent)' : 'var(--text-muted)';
+        clearPresetPreviewURLs();
+        resetLutCardPreviews();
       });
       
       batchMistToggle.addEventListener('change', (e) => {
         blackMistEnabled = e.target.checked;
         batchMistStatus.textContent = blackMistEnabled ? 'ON' : 'OFF';
         batchMistStatus.style.color = blackMistEnabled ? 'var(--accent)' : 'var(--text-muted)';
+        clearPresetPreviewURLs();
+        resetLutCardPreviews();
       });
       
       // Intensity slider
@@ -2498,6 +2976,8 @@
         const val = e.target.value;
         batchIntensityVal.textContent = val + '%';
         currentIntensity = parseFloat(val) / 100.0;
+        clearPresetPreviewURLs();
+        resetLutCardPreviews();
       });
       
       // Execute Batch
@@ -2584,19 +3064,26 @@
       const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
       document.getElementById('diag-standalone').textContent = isStandalone ? 'YES (PWA)' : 'NO (BROWSER)';
       
-      if ('serviceWorker' in navigator) {
+      const swEl = document.getElementById('diag-sw');
+      if (!window.isSecureContext) {
+        swEl.textContent = 'INSECURE (REQUIRES HTTPS)';
+        swEl.style.color = 'var(--warning)';
+      } else if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistration().then(reg => {
-          const el = document.getElementById('diag-sw');
           if (reg) {
-            el.textContent = 'ACTIVE';
-            el.style.color = 'var(--success)';
+            swEl.textContent = 'ACTIVE';
+            swEl.style.color = 'var(--success)';
           } else {
-            el.textContent = 'REGISTERING';
-            el.style.color = 'var(--warning)';
+            swEl.textContent = 'REGISTERING';
+            swEl.style.color = 'var(--warning)';
           }
+        }).catch(err => {
+          swEl.textContent = 'ERROR: ' + err.message.toUpperCase();
+          swEl.style.color = 'var(--error)';
         });
       } else {
-        document.getElementById('diag-sw').textContent = 'UNSUPPORTED';
+        swEl.textContent = 'UNSUPPORTED BY BROWSER';
+        swEl.style.color = 'var(--error)';
       }
       document.getElementById('diag-viewport').textContent = `${window.innerWidth} x ${window.innerHeight}`;
     }
