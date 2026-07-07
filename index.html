@@ -1,0 +1,2457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Viewport cover configuration specifically optimized for iPhone 15 Pro safe areas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>DARKROOM // DEVELOPMENT STATION</title>
+  
+  <!-- Apple Standalone PWA configurations -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="DARKROOM">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #080808;
+      --card-bg: #121212;
+      --card-border: #222222;
+      --accent: #ff5500; /* Safety Orange */
+      --accent-hover: #ff7733;
+      --accent-dim: #331100;
+      --text: #ffffff;
+      --text-muted: #777777;
+      --success: #39ff14; /* Neon Green */
+      --warning: #ffcc00;
+      
+      --font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+    }
+    
+    /* Native App lockdown: Disable scrolling and selection */
+    * {
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    input {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100vh;
+      height: var(--vh, 100vh);
+      background-color: var(--bg-color);
+      color: var(--text);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      position: fixed;
+      left: 0;
+      top: 0;
+    }
+
+    .bottom-navigation-bar {
+        padding-bottom: var(--safe-bottom);
+    }
+    
+    .grid-bg {
+      background-image: radial-gradient(rgba(255, 85, 0, 0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-position: center;
+    }
+    
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+      height: var(--vh, 100vh);
+      padding-top: var(--safe-top);
+      padding-bottom: 0;
+      padding-left: var(--safe-left);
+      padding-right: var(--safe-right);
+      box-sizing: border-box;
+    }
+    
+    header {
+      position: relative;
+      height: 60px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.5px;
+      background-color: rgba(8, 8, 8, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+    
+    .sys-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background-color: rgba(255, 255, 255, 0.03);
+      padding: 4px 6px;
+      border: 1px solid var(--card-border);
+      border-radius: 2px;
+    }
+    
+    .led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .led.online {
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+    .led.offline {
+      background-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .led.connecting {
+      background-color: var(--warning);
+      box-shadow: 0 0 8px var(--warning);
+      animation: led-blink 1s infinite alternate;
+    }
+    
+    @keyframes led-blink {
+      0% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+    
+    .title-area {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: 700;
+      color: #fff;
+      pointer-events: none;
+      text-align: center;
+    }
+    
+    .btn-tactile-sm {
+      background: none;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.15s ease;
+    }
+    .btn-tactile-sm:active, .btn-tactile-sm.active {
+      border-color: var(--accent);
+      color: var(--text);
+      background-color: var(--accent-dim);
+    }
+    
+    .view-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .view-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      animation: fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .view-panel.active {
+      display: flex;
+    }
+    
+    @keyframes fade-in {
+      from { opacity: 0; transform: scale(0.99); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .shutter-bar {
+      padding: 15px 20px calc(15px + var(--safe-bottom)) 20px;
+      background: rgba(18, 18, 18, 0.4);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .btn-shutter {
+      flex: 1;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      height: 42px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-shutter:active {
+      transform: scale(0.98);
+      background-color: var(--accent-hover);
+    }
+    .btn-shutter:disabled {
+      background-color: #1a1a1a;
+      color: #555;
+      box-shadow: none;
+      border: 1px solid var(--card-border);
+      cursor: not-allowed;
+    }
+    .btn-shutter.secondary {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      box-shadow: none;
+    }
+    .btn-shutter.secondary:active {
+      background: rgba(255, 255, 255, 0.07);
+    }
+    
+    .gallery-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px 20px calc(20px + var(--safe-bottom)) 20px;
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+    
+    @media (min-width: 768px) {
+      .gallery-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    .gallery-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .gallery-card:active {
+      border-color: var(--accent);
+      transform: scale(0.98);
+    }
+    
+    .thumb-wrapper {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #000;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .card-meta {
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .card-meta-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .img-name {
+      color: var(--text);
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 65%;
+    }
+    
+    .img-size {
+      color: var(--accent);
+    }
+    
+    .img-time {
+      color: var(--text-muted);
+    }
+    
+    .undeveloped-slot {
+      border: 1px dashed #441111 !important;
+      position: relative;
+    }
+    .undeveloped-slot::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(rgba(255, 0, 0, 0.02), rgba(0, 0, 0, 0));
+      pointer-events: none;
+    }
+    
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 180px;
+      text-align: center;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      gap: 10px;
+    }
+    
+    .editor-header {
+      height: 50px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 15px;
+    }
+    
+    .canvas-hud {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--card-border);
+      padding: 6px 10px;
+      pointer-events: none;
+      z-index: 10;
+      letter-spacing: 1px;
+    }
+    
+    .canvas-hud span {
+      color: var(--accent);
+    }
+    
+    .editor-controls {
+      background-color: var(--card-bg);
+      border-top: 1px solid var(--card-border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+    .slider-header span.val {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    
+    .slider-track-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .slider-input {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: #222;
+      outline: none;
+      border-radius: 2px;
+    }
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 2px;
+      background: var(--accent);
+      border: 1px solid #fff;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255, 85, 0, 0.4);
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-group label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .form-group input {
+      background: #000;
+      border: 1px solid var(--card-border);
+      padding: 12px;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      border-radius: 4px;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--accent);
+    }
+    
+    .lut-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .lut-card.active {
+      border-color: var(--accent);
+      background-color: var(--accent-dim);
+    }
+    .lut-card-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .lut-card-desc {
+      font-family: var(--font-sans);
+      font-size: 9px;
+      color: var(--text-muted);
+      line-height: 1.1;
+    }
+    .lut-card.active .lut-card-desc {
+      color: #ffaa80;
+    }
+    
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 400px;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      animation: modal-pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes modal-pop {
+      from { transform: scale(0.9) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    
+    .modal-title {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 10px;
+      color: var(--accent);
+    }
+    
+    .diagnostics-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: #000;
+      padding: 12px;
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+    }
+    
+    .diag-item {
+      display: flex;
+      justify-content: space-between;
+    }
+    .diag-val {
+      color: var(--accent);
+    }
+    
+    .btn-tactile-lg {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 10px rgba(255, 85, 0, 0.2);
+    }
+    .btn-tactile-lg:active {
+      transform: scale(0.98);
+      background-color: var(--accent-hover);
+    }
+    .btn-tactile-lg:disabled {
+      background-color: #1a1a1a;
+      color: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    .btn-tactile-lg.secondary {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      box-shadow: none;
+    }
+    .btn-tactile-lg.secondary:active {
+      background: rgba(255,255,255,0.03);
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    .loading-overlay.active {
+      display: flex;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 85, 0, 0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: var(--text);
+    }
+    
+    .toast-container {
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 30px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      width: 90%;
+      max-width: 320px;
+    }
+    
+    .toast {
+      background: rgba(18, 18, 18, 0.9);
+      border: 1px solid var(--card-border);
+      padding: 12px 18px;
+      border-radius: 4px;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      animation: toast-slide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      border-left: 3px solid var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--accent); }
+    .toast.info { border-left-color: var(--warning); }
+    
+    @keyframes toast-slide {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .save-modal-img {
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid var(--card-border);
+      max-height: 280px;
+      object-fit: contain;
+      background: #000;
+    }
+    
+    /* Darkroom Safelight overlay */
+    .darkroom-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: #060000;
+      z-index: 10000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 25px;
+      padding: 30px;
+      box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.25);
+    }
+    .darkroom-overlay.active {
+      display: flex;
+      animation: darkroom-fade 0.3s ease-out;
+    }
+    @keyframes darkroom-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .safelight-bulb {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #ff0000;
+      border: 3px solid #ff3333;
+      box-shadow: 0 0 30px #ff0000;
+      animation: safelight-pulse 2s infinite alternate;
+    }
+    @keyframes safelight-pulse {
+      0% { background-color: #880000; box-shadow: 0 0 15px #ff0000; }
+      100% { background-color: #ff0000; box-shadow: 0 0 40px #ff0000; }
+    }
+    .darkroom-console {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #ff3333;
+      text-shadow: 0 0 4px #ff0000;
+      width: 90%;
+      max-width: 320px;
+      background: rgba(0,0,0,0.85);
+      border: 1px solid #440000;
+      padding: 18px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .darkroom-log-line {
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); filter: brightness(0.8); }
+      100% { transform: scale(1.05); filter: brightness(1.2); }
+    }
+    
+    /* Horizontal Swipe Gallery */
+    .horizontal-gallery {
+      flex: 1;
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+      height: 100%;
+      background: #050505;
+      scrollbar-width: none;
+    }
+    .horizontal-gallery::-webkit-scrollbar {
+      display: none;
+    }
+    .horizontal-slide {
+      flex-shrink: 0;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 0;
+      position: relative;
+    }
+    .horizontal-slide-img-wrap {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-height: 65%;
+    }
+    .horizontal-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      border-top: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--card-border);
+      background: #000;
+    }
+    .slide-meta {
+      width: 100%;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 15px;
+      padding-bottom: var(--safe-bottom);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      letter-spacing: 0.5px;
+    }
+    .slide-meta-title {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body class="grid-bg">
+  
+  <!-- Offscreen WebGL Canvas -->
+  <canvas id="gl-canvas" style="position: absolute; left: -9999px; top: -9999px; pointer-events: none;"></canvas>
+  
+  <!-- Darkroom chemical progress overlay -->
+  <div class="darkroom-overlay" id="darkroom-overlay">
+    <div class="safelight-bulb"></div>
+    <div class="darkroom-console" id="darkroom-console-box">
+      <div class="darkroom-log-line" style="color: #ffaa00; text-shadow: 0 0 4px #ffaa00; font-weight: 700;">[DARKROOM EMULSION MODULE READY]</div>
+      <div class="darkroom-log-line" id="darkroom-log-active">SENSING CHEMICAL REACTION...</div>
+    </div>
+  </div>
+  
+  <div class="app-container">
+    <!-- Header Console -->
+    <header>
+      <div class="sys-info">
+        <div class="status-indicator">
+          <div class="led offline" id="conn-led"></div>
+          <span style="color: var(--text-muted); font-weight: 700; font-family: var(--font-mono); font-size: 11px;" id="ip-display">OFFLINE</span>
+        </div>
+      </div>
+      
+      <div class="title-area">P4_DARKROOM</div>
+      
+      <div class="header-actions">
+        <button class="btn-tactile-sm" id="btn-settings-open" title="System Settings" style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <!-- View Panels -->
+    <div class="view-container">
+      
+      <!-- Phase 1: Connection & Spool Status -->
+      <section class="view-panel active" id="start-panel">
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; gap: 25px;">
+          
+          <!-- Spool status box -->
+          <div style="width: 100%; max-width: 320px; border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 6px; padding: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center;">
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 1px;">CARTRIDGE DIRECTORY</div>
+            <div id="cartridge-status-icon" style="color: var(--accent); animation: pulse 2s infinite alternate;">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            </div>
+            
+            <div id="cartridge-summary" style="font-size: 16px; font-weight: 700; font-family: var(--font-sans);">
+              CARTRIDGE: DISCONNECTED
+            </div>
+            
+            <div id="cartridge-details" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); line-height: 1.5;">
+              Camera file spool cannot be read.
+            </div>
+          </div>
+          
+          <!-- Wi-Fi instructions for iOS -->
+          <div id="wifi-instructions" style="width: 100%; max-width: 320px; border: 1px dashed #3c1515; background: #120303; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; gap: 10px; font-family: var(--font-mono); font-size: 10px; text-align: left; line-height: 1.4; color: #ff6666;">
+            <div style="font-weight: 700; color: #ff3333;">⚠️ LINK STATUS: CAMERA DISCONNECTED</div>
+            <div>To establish cartridge connection:</div>
+            <div>1. Open iPhone <strong>Settings</strong> -> <strong>Wi-Fi</strong>.</div>
+            <div>2. Connect to the camera Access Point (e.g. <strong>ESP32-P4-CAMERA</strong>).</div>
+            <div>3. Return here and tap "RE-ESTABLISH LINK".</div>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px;">
+            <button class="btn-tactile-lg" id="btn-start-develop" disabled>INITIALIZE FILM DEVELOPMENT</button>
+            <div style="display: flex; gap: 10px; width: 100%;">
+              <button class="btn-tactile-lg secondary" id="btn-reconnect" style="flex: 1; margin: 0;">RE-ESTABLISH LINK</button>
+              <button class="btn-tactile-lg secondary" id="btn-usb-import" style="flex: 1; margin: 0; border-color: var(--accent); color: var(--accent);">IMPORT FROM USB-C</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Negative Frame slots (Visual Undeveloped Roll Preview) -->
+        <div style="border-top: 1px solid var(--card-border); padding: 20px 20px var(--safe-bottom) 20px; background: rgba(0,0,0,0.4);">
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px; text-align: center;">UNPROCESSED NEGATIVE STRIP PREVIEW</div>
+          <div class="gallery-grid" id="undeveloped-grid">
+            <!-- Populated on startup -->
+          </div>
+        </div>
+      </section>
+      
+      <!-- Phase 2: Preset Development Style Selector -->
+      <section class="view-panel" id="style-panel">
+        <div class="editor-header">
+          <button class="btn-tactile-sm" id="btn-style-back">◀ CANCEL</button>
+          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700;">DEVELOPMENT SETTINGS</div>
+          <div style="width: 50px;"></div>
+        </div>
+        
+        <div style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 25px; display: flex; flex-direction: column; gap: 20px;">
+          
+          <button class="btn-tactile-lg" id="btn-execute-batch" style="margin: 0; background: var(--accent); color: #fff; border: none; box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3);">START BATCH DEVELOPMENT</button>
+          
+          <div style="border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px; font-family: var(--font-mono); font-size: 11px; line-height: 1.4; color: var(--text-muted);">
+            Select a chemical LUT profile to apply to all <span style="color: var(--accent); font-weight: 700;" id="style-exposure-count">4</span> exposures. The WebGL context will execute batch color grading on the GPU.
+          </div>
+          
+          <!-- Presets -->
+          <div class="form-group">
+            <label>CHEMICAL EMULSION PRESET</label>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%;" id="batch-lut-container">
+              <div class="lut-card active" data-lut="identity" style="height: 70px;">
+                <div class="lut-card-title">ORIGINAL</div>
+                <div class="lut-card-desc">Flat raw feed</div>
+              </div>
+              <div class="lut-card" data-lut="monochrome" style="height: 70px;">
+                <div class="lut-card-title">M-100 MONO</div>
+                <div class="lut-card-desc">High contrast monochrome</div>
+              </div>
+              <div class="lut-card" data-lut="warm" style="height: 70px;">
+                <div class="lut-card-title">W-105 AMBER</div>
+                <div class="lut-card-desc">Warm golden hour glow</div>
+              </div>
+              <div class="lut-card" data-lut="cool" style="height: 70px;">
+                <div class="lut-card-title">C-200 TEAL</div>
+                <div class="lut-card-desc">Deep cyber cool colors</div>
+              </div>
+              <div class="lut-card" data-lut="cinematic" style="height: 70px;">
+                <div class="lut-card-title">T-800 ORG</div>
+                <div class="lut-card-desc">Teal & orange matrix</div>
+              </div>
+              <div class="lut-card" data-lut="vintage" style="height: 70px;">
+                <div class="lut-card-title">V-300 POLA</div>
+                <div class="lut-card-desc">Polaroid faded film style</div>
+              </div>
+              <div class="lut-card" data-lut="bleach_bypass" style="height: 70px;">
+                <div class="lut-card-title">B-400 BYPASS</div>
+                <div class="lut-card-desc">Bleach bypass cinematic</div>
+              </div>
+              <div class="lut-card" id="card-batch-custom" style="height: 70px; border-style: dashed;">
+                <div class="lut-card-title" id="batch-custom-title">+ IMPORT</div>
+                <div class="lut-card-desc">Load custom .cube</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Vintage effects toggle -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-family: var(--font-sans); font-size: 13px; font-weight: 600;">VINTAGE ANALOG EFFECTS</span>
+              <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">Include film grain & lens vignette</span>
+            </div>
+            <label style="display: flex; align-items: center; cursor: pointer; gap: 8px;">
+              <span id="batch-grain-status" style="font-family: var(--font-mono); font-size: 11px; color: var(--accent); font-weight: 700;">ON</span>
+              <input type="checkbox" id="batch-grain-toggle" checked style="width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;">
+            </label>
+          </div>
+          
+          <!-- Intensity slider -->
+          <div class="slider-container" style="border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px;">
+            <div class="slider-header">
+              <span>COLOR GRADE INTENSITY</span>
+              <span class="val" id="batch-intensity-val">100%</span>
+            </div>
+            <div class="slider-track-wrap">
+              <input type="range" class="slider-input" id="batch-intensity-slider" min="0" max="100" value="100">
+            </div>
+          </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Phase 3: Developed Spool Grid View -->
+      <section class="view-panel" id="final-panel">
+        <div class="editor-header">
+          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700;">DEVELOPED SPOOL</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent);" id="final-luts-used">LUT: NONE</div>
+        </div>
+        
+        <div class="shutter-bar">
+          <button class="btn-shutter" id="btn-download-all" style="background: var(--accent); color: #fff; box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            SAVE ALL
+          </button>
+          <button class="btn-shutter secondary" id="btn-redevelop">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            RE-DEVELOP
+          </button>
+          <button class="btn-shutter secondary" id="btn-reset-roll" style="flex: 0.4;" title="New Film Roll">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Canister Outer Border -->
+              <rect x="4" y="3" width="10" height="18" rx="1.5"/>
+              <!-- Center Hub core line -->
+              <line x1="9" y1="3" x2="9" y2="21"/>
+              <!-- Film Ribbon extending on right -->
+              <path d="M14 6h5a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-5"/>
+              <!-- Sprocket holes on the ribbon lead -->
+              <rect x="16" y="8" width="2" height="2" rx="0.5"/>
+              <rect x="16" y="14" width="2" height="2" rx="0.5"/>
+              <!-- Safety grips on canister -->
+              <line x1="6" y1="7" x2="7.5" y2="7"/>
+              <line x1="6" y1="12" x2="7.5" y2="12"/>
+              <line x1="6" y1="17" x2="7.5" y2="17"/>
+              <!-- Plus sign bottom-right -->
+              <path d="M17 20h5M19.5 17.5v5" stroke="var(--accent)" stroke-width="2.5"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="gallery-scroll">
+          <div class="gallery-grid" id="final-grid">
+            <!-- Developed grid populated here dynamically -->
+          </div>
+        </div>
+      </section>
+      
+      <!-- Phase 4: Slide Viewer -->
+      <section class="view-panel" id="viewer-panel">
+        <div class="editor-header">
+          <button class="btn-tactile-sm" id="btn-viewer-back">◀ GRID</button>
+          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700;" id="viewer-title">DEV_PHOTO.JPG</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent);" id="viewer-indicator">1 OF 4</div>
+        </div>
+        
+        <div class="horizontal-gallery" id="viewer-horizontal-gallery">
+          <!-- Slides populated here dynamically -->
+        </div>
+        
+        <div class="shutter-bar">
+          <button class="btn-shutter secondary" id="btn-viewer-back-shutter" style="flex: 0.6;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            GRID
+          </button>
+          <button class="btn-shutter" id="btn-viewer-download-all" style="background: var(--accent); color: #fff; box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            SAVE ALL
+          </button>
+          <button class="btn-shutter secondary" id="btn-viewer-redevelop">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            RE-DEVELOP
+          </button>
+          <button class="btn-shutter secondary" id="btn-viewer-reset-roll" style="flex: 0.4;" title="New Film Roll">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Canister Outer Border -->
+              <rect x="4" y="3" width="10" height="18" rx="1.5"/>
+              <!-- Center Hub core line -->
+              <line x1="9" y1="3" x2="9" y2="21"/>
+              <!-- Film Ribbon extending on right -->
+              <path d="M14 6h5a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-5"/>
+              <!-- Sprocket holes on the ribbon lead -->
+              <rect x="16" y="8" width="2" height="2" rx="0.5"/>
+              <rect x="16" y="14" width="2" height="2" rx="0.5"/>
+              <!-- Safety grips on canister -->
+              <line x1="6" y1="7" x2="7.5" y2="7"/>
+              <line x1="6" y1="12" x2="7.5" y2="12"/>
+              <line x1="6" y1="17" x2="7.5" y2="17"/>
+              <!-- Plus sign bottom-right -->
+              <path d="M17 20h5M19.5 17.5v5" stroke="var(--accent)" stroke-width="2.5"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+      
+    </div>
+  </div>
+  
+  <!-- File Import Hidden Inputs -->
+  <input type="file" id="cube-file-input" accept=".cube" style="display: none;">
+  <input type="file" id="usb-file-input" multiple accept="image/jpeg,image/raw" style="display: none;">
+  
+  <!-- Setup Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-content">
+      <div class="modal-title">SYSTEM CONFIGURATION //</div>
+      
+      <div class="form-group">
+        <label for="camera-ip">ESP32-P4 ADDRESS (IP)</label>
+        <input type="text" id="camera-ip" value="192.168.4.1" placeholder="e.g. 192.168.4.1">
+      </div>
+      
+      <div class="form-group" style="flex-direction: row; justify-content: space-between; align-items: center; padding-top: 10px;">
+        <label for="mock-mode-toggle" style="cursor: pointer;">FORCE DEMO / MOCK MODE</label>
+        <input type="checkbox" id="mock-mode-toggle" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--accent);">
+      </div>
+      
+      <div class="diagnostics-list">
+        <div class="diag-item">
+          <span>HOST OS:</span>
+          <span class="diag-val" id="diag-os">UNKNOWN</span>
+        </div>
+        <div class="diag-item">
+          <span>STANDALONE MODE:</span>
+          <span class="diag-val" id="diag-standalone">NO</span>
+        </div>
+        <div class="diag-item">
+          <span>WEBGL2 RENDERER:</span>
+          <span class="diag-val" id="diag-webgl2">INIT...</span>
+        </div>
+        <div class="diag-item">
+          <span>SERVICE WORKER:</span>
+          <span class="diag-val" id="diag-sw">NOT ACTIVE</span>
+        </div>
+        <div class="diag-item">
+          <span>VIEWPORT RESOLUTION:</span>
+          <span class="diag-val" id="diag-viewport">0 x 0</span>
+        </div>
+      </div>
+      
+      <button class="btn-tactile-lg" id="btn-settings-close">APPLY CONFIGURATION</button>
+      <button class="btn-tactile-lg secondary" id="btn-hard-reset" style="margin-top: 10px; border-color: var(--accent); color: var(--accent);">FORCE RELOAD (CLEAR CACHE)</button>
+    </div>
+  </div>
+  
+  <!-- Developed Image Preview Modal -->
+  <div class="modal-overlay" id="preview-modal">
+    <div class="modal-content" style="max-width: 420px; padding: 20px;">
+      <div class="modal-title" id="preview-title">DEVELOPED_PHOTO.JPG</div>
+      
+      <img src="" id="preview-modal-img" class="save-modal-img" alt="Developed Frame Preview">
+      
+      <div class="ios-note" id="ios-note-box">
+        <strong>💡 iPhone PWA Camera Roll Save:</strong><br>
+        Touch and hold the image above, then select <strong>"Save to Photos"</strong>.
+      </div>
+      
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-tactile-lg secondary" id="btn-preview-download" style="flex: 1;">FILES SAVE</button>
+        <button class="btn-tactile-lg" id="btn-preview-close" style="flex: 1;">CLOSE</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Global Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+  
+  <!-- Loader Blocker -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-text">SYNCING CARTRIDGE...</div>
+  </div>
+  
+  <script>
+    // ----------------------------------------------------
+    // 1. WebGL2 3D LUT Image Processing Engine
+    // ----------------------------------------------------
+    class WebGLProcessor {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.gl = canvas.getContext('webgl2', { 
+          preserveDrawingBuffer: true, 
+          antialias: false,
+          powerPreference: 'high-performance' 
+        });
+        if (!this.gl) {
+          throw new Error('WebGL2 Context could not be initialized.');
+        }
+        
+        this.lutSize = 16;
+        this.grainEnabled = true; // Default ON
+        this.initShaders();
+        this.initBuffers();
+        this.initTextures();
+      }
+      
+      initShaders() {
+        const gl = this.gl;
+        
+        const vsSource = `#version 300 es
+          in vec2 a_position;
+          out vec2 v_texCoord;
+          void main() {
+            v_texCoord = a_position * 0.5 + 0.5;
+            v_texCoord.y = 1.0 - v_texCoord.y; // Correct Y orientation for image load
+            gl_Position = vec4(a_position, 0.0, 1.0);
+          }
+        `;
+        
+        const fsSource = `#version 300 es
+          precision highp float;
+          
+          in vec2 v_texCoord;
+          out vec4 outColor;
+          
+          uniform highp sampler2D u_image;
+          uniform highp sampler3D u_lut;
+          uniform float u_lutSize;
+          uniform float u_mix;
+          uniform float u_splitX; // -1.0 = no split, 0.0 to 1.0 split position
+          
+          uniform float u_grainEnabled; // 1.0 = active, 0.0 = bypassed
+          uniform vec2 u_resolution; // Viewport resolution for pixel-perfect noise
+          
+          // Pseudo-random noise hash
+          float pseudoNoise(vec2 co) {
+            return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+          }
+          
+          void main() {
+            vec4 originalColor;
+            
+            // 1. Chromatic Aberration: sample Red/Blue channels with positional offsets based on lens center distance
+            if (u_grainEnabled > 0.5) {
+              vec2 uvDistort = v_texCoord - vec2(0.5);
+              float dist = length(uvDistort);
+              vec2 chromaticOffset = uvDistort * dist * 0.012; // scales with distance from center
+              
+              originalColor = vec4(
+                texture(u_image, v_texCoord - chromaticOffset).r,
+                texture(u_image, v_texCoord).g,
+                texture(u_image, v_texCoord + chromaticOffset).b,
+                texture(u_image, v_texCoord).a
+              );
+            } else {
+              originalColor = texture(u_image, v_texCoord);
+            }
+            
+            // Map values to texture bounds to prevent interpolation edge bleed
+            vec3 scale = vec3((u_lutSize - 1.0) / u_lutSize);
+            vec3 offset = vec3(0.5 / u_lutSize);
+            vec3 lutCoords = clamp(originalColor.rgb, 0.0, 1.0) * scale + offset;
+            
+            // Fetch graded color from 3D texture
+            vec4 gradedColor = vec4(texture(u_lut, lutCoords).rgb, originalColor.a);
+            
+            vec4 finalColor;
+            if (u_splitX >= 0.0) {
+              if (v_texCoord.x < u_splitX) {
+                finalColor = originalColor;
+              } else {
+                finalColor = gradedColor;
+              }
+            } else {
+              finalColor = mix(originalColor, gradedColor, u_mix);
+            }
+            
+            // Post-processing pipeline (Vignette, Contrast, Split-Toning, Grain)
+            if (u_grainEnabled > 0.5) {
+              // 2. Vintage lens vignette: smooth radial falloff
+              vec2 uv = v_texCoord - vec2(0.5);
+              float dist = length(uv);
+              float vignette = 1.0 - smoothstep(0.25, 0.75, dist) * 0.45;
+              finalColor.rgb *= vignette;
+              
+              // 3. Contrast boost: deliberately crush the deep shadows
+              finalColor.rgb = smoothstep(0.06, 1.0, finalColor.rgb);
+              
+              // 4. Warm split-toning multiplier (highlights to amber/yellow, midtones to warm gold)
+              float luma = dot(finalColor.rgb, vec3(0.299, 0.587, 0.114));
+              vec3 highlightTint = vec3(1.0, 0.85, 0.6);
+              vec3 midtoneTint = vec3(1.0, 0.92, 0.7);
+              vec3 tintColor = mix(midtoneTint, highlightTint, luma);
+              float tintFactor = smoothstep(0.0, 0.4, luma);
+              finalColor.rgb = mix(finalColor.rgb, finalColor.rgb * tintColor, tintFactor);
+              
+              // 5. Emulsion distribution: grain density decays in shadows/lights, peaks in midtones
+              float grainStrength = 0.14 * (1.0 - 4.0 * (luma - 0.5) * (luma - 0.5));
+              grainStrength = clamp(grainStrength, 0.0, 0.14);
+              float noise = pseudoNoise(v_texCoord * u_resolution) - 0.5;
+              finalColor.rgb += vec3(noise * grainStrength);
+              
+              finalColor.rgb = clamp(finalColor.rgb, 0.0, 1.0);
+            }
+            
+            outColor = finalColor;
+          }
+        `;
+        
+        const vs = this.compileShader(vsSource, gl.VERTEX_SHADER);
+        const fs = this.compileShader(fsSource, gl.FRAGMENT_SHADER);
+        
+        this.program = gl.createProgram();
+        gl.attachShader(this.program, vs);
+        gl.attachShader(this.program, fs);
+        gl.linkProgram(this.program);
+        
+        if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+          throw new Error('WebGL Link Failure: ' + gl.getProgramInfoLog(this.program));
+        }
+        
+        this.attribs = {
+          position: gl.getAttribLocation(this.program, 'a_position')
+        };
+        
+        this.uniforms = {
+          image: gl.getUniformLocation(this.program, 'u_image'),
+          lut: gl.getUniformLocation(this.program, 'u_lut'),
+          lutSize: gl.getUniformLocation(this.program, 'u_lutSize'),
+          mix: gl.getUniformLocation(this.program, 'u_mix'),
+          splitX: gl.getUniformLocation(this.program, 'u_splitX'),
+          grainEnabled: gl.getUniformLocation(this.program, 'u_grainEnabled'),
+          resolution: gl.getUniformLocation(this.program, 'u_resolution')
+        };
+      }
+      
+      compileShader(source, type) {
+        const gl = this.gl;
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          const log = gl.getShaderInfoLog(shader);
+          gl.deleteShader(shader);
+          throw new Error('Shader Compile Failure: ' + log);
+        }
+        return shader;
+      }
+      
+      initBuffers() {
+        const gl = this.gl;
+        
+        this.positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+          -1, -1,
+           1, -1,
+          -1,  1,
+          -1,  1,
+           1, -1,
+           1,  1
+        ]), gl.STATIC_DRAW);
+        
+        this.vao = gl.createVertexArray();
+        gl.bindVertexArray(this.vao);
+        gl.enableVertexAttribArray(this.attribs.position);
+        gl.vertexAttribPointer(this.attribs.position, 2, gl.FLOAT, false, 0, 0);
+      }
+      
+      initTextures() {
+        const gl = this.gl;
+        
+        this.imageTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.imageTexture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        
+        this.lutTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_3D, this.lutTexture);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      }
+      
+      setImage(img) {
+        const gl = this.gl;
+        this.canvas.width = img.naturalWidth || img.width || 1200;
+        this.canvas.height = img.naturalHeight || img.height || 900;
+        
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        
+        gl.bindTexture(gl.TEXTURE_2D, this.imageTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      }
+      
+      setLUT(data, size) {
+        const gl = this.gl;
+        this.lutSize = size;
+        
+        gl.bindTexture(gl.TEXTURE_3D, this.lutTexture);
+        gl.texImage3D(
+          gl.TEXTURE_3D,
+          0,
+          gl.RGBA8,
+          size,
+          size,
+          size,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          data
+        );
+      }
+      
+      setGrainEnabled(enabled) {
+        this.grainEnabled = enabled;
+      }
+      
+      render(mixVal = 1.0, splitX = -1.0) {
+        const gl = this.gl;
+        
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        
+        gl.useProgram(this.program);
+        gl.bindVertexArray(this.vao);
+        
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.imageTexture);
+        gl.uniform1i(this.uniforms.image, 0);
+        
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_3D, this.lutTexture);
+        gl.uniform1i(this.uniforms.lut, 1);
+        
+        gl.uniform1f(this.uniforms.lutSize, this.lutSize);
+        gl.uniform1f(this.uniforms.mix, mixVal);
+        gl.uniform1f(this.uniforms.splitX, splitX);
+        
+        gl.uniform1f(this.uniforms.grainEnabled, this.grainEnabled ? 1.0 : 0.0);
+        gl.uniform2f(this.uniforms.resolution, this.canvas.width, this.canvas.height);
+        
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+      }
+      
+      exportBlob(quality = 0.95) {
+        return new Promise(resolve => {
+          this.canvas.toBlob(resolve, 'image/jpeg', quality);
+        });
+      }
+    }
+    
+    // ----------------------------------------------------
+    // 2. Procedural Built-in 3D LUT Generator
+    // ----------------------------------------------------
+    function generatePresetLUT(presetType, N = 32) {
+      const data = new Uint8Array(N * N * N * 4);
+      let idx = 0;
+      
+      for (let b = 0; b < N; b++) {
+        const bf = b / (N - 1);
+        for (let g = 0; g < N; g++) {
+          const gf = g / (N - 1);
+          for (let r = 0; r < N; r++) {
+            const rf = r / (N - 1);
+            
+            let ro = rf;
+            let go = gf;
+            let bo = bf;
+            
+            switch (presetType) {
+              case 'identity': break;
+              case 'monochrome': {
+                const gray = 0.299 * rf + 0.587 * gf + 0.114 * bf;
+                const val = Math.sin((gray - 0.5) * Math.PI) * 0.45 + 0.5;
+                ro = go = bo = Math.max(0, Math.min(1, val));
+                break;
+              }
+              case 'warm':
+                ro = Math.min(1.0, rf * 1.12 + 0.04);
+                go = Math.min(1.0, gf * 1.03 + 0.02);
+                bo = bf * 0.88;
+                break;
+              case 'cool':
+                ro = rf * 0.88;
+                go = Math.min(1.0, gf * 1.02 + 0.02);
+                bo = Math.min(1.0, bf * 1.15 + 0.05);
+                break;
+              case 'cinematic': {
+                const gray = 0.299 * rf + 0.587 * gf + 0.114 * bf;
+                const rS = rf * 0.65, gS = gf * 0.85, bS = bf * 1.15;
+                const rH = rf * 1.2, gH = gf * 0.95, bH = bf * 0.7;
+                ro = Math.max(0, Math.min(1, rS * (1 - gray) + rH * gray));
+                go = Math.max(0, Math.min(1, gS * (1 - gray) + gH * gray));
+                bo = Math.max(0, Math.min(1, bS * (1 - gray) + bH * gray));
+                break;
+              }
+              case 'vintage': {
+                // A. Muddy but neutral deep blacks
+                const blackPoint = 0.07;
+                let r_base = blackPoint + (1.0 - blackPoint) * rf;
+                let g_base = blackPoint + (1.0 - blackPoint) * gf;
+                let b_base = blackPoint + (1.0 - blackPoint) * bf;
+                
+                // B. Heavy warm cast: midtones toward warm gold, highlights toward amber/yellow
+                const luma = 0.299 * rf + 0.587 * gf + 0.114 * bf;
+                
+                // Highlights: (1.0, 0.85, 0.6), Midtones: (1.0, 0.92, 0.7)
+                const tint_r = 1.0;
+                const tint_g = 0.92 * (1.0 - luma) + 0.85 * luma;
+                const tint_b = 0.70 * (1.0 - luma) + 0.60 * luma;
+                
+                const tintFactor = Math.min(1.0, luma / 0.4); 
+                
+                ro = r_base * (1.0 - tintFactor) + (r_base * tint_r) * tintFactor;
+                go = g_base * (1.0 - tintFactor) + (g_base * tint_g) * tintFactor;
+                bo = b_base * (1.0 - tintFactor) + (b_base * tint_b) * tintFactor;
+                
+                ro = Math.max(0, Math.min(1, ro));
+                go = Math.max(0, Math.min(1, go));
+                bo = Math.max(0, Math.min(1, bo));
+                break;
+              }
+              case 'bleach_bypass': {
+                const gray = 0.299 * rf + 0.587 * gf + 0.114 * bf;
+                const overlay = (b_val, bl_val) => b_val < 0.5 ? 2.0 * b_val * bl_val : 1.0 - 2.0 * (1.0 - b_val) * (1.0 - bl_val);
+                ro = rf * 0.35 + overlay(rf, gray) * 0.65;
+                go = gf * 0.35 + overlay(gf, gray) * 0.65;
+                bo = bf * 0.35 + overlay(bf, gray) * 0.65;
+                break;
+              }
+            }
+            
+            data[idx] = Math.round(ro * 255);
+            data[idx + 1] = Math.round(go * 255);
+            data[idx + 2] = Math.round(bo * 255);
+            data[idx + 3] = 255;
+            idx += 4;
+          }
+        }
+      }
+      return data;
+    }
+    
+    // ----------------------------------------------------
+    // 3. Cube LUT File Ingestion Parser (.cube)
+    // ----------------------------------------------------
+    function parseCubeLUT(text) {
+      const lines = text.split('\n');
+      let size = 0;
+      const rgbEntries = [];
+      
+      for (let rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith('#')) continue;
+        
+        if (line.startsWith('LUT_3D_SIZE')) {
+          const parts = line.split(/\s+/);
+          size = parseInt(parts[1], 10);
+          continue;
+        }
+        if (line.startsWith('DOMAIN_MIN') || line.startsWith('DOMAIN_MAX')) continue;
+        
+        const coords = line.split(/\s+/);
+        if (coords.length >= 3) {
+          const r = parseFloat(coords[0]);
+          const g = parseFloat(coords[1]);
+          const b = parseFloat(coords[2]);
+          if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+            rgbEntries.push([r, g, b]);
+          }
+        }
+      }
+      
+      if (size === 0) throw new Error('Invalid format: LUT_3D_SIZE missing.');
+      const expectedCount = size * size * size;
+      if (rgbEntries.length < expectedCount) throw new Error(`Incomplete LUT. Found ${rgbEntries.length}/${expectedCount}`);
+      
+      const data = new Uint8Array(expectedCount * 4);
+      for (let i = 0; i < expectedCount; i++) {
+        const entry = rgbEntries[i];
+        data[i * 4]     = Math.max(0, Math.min(255, Math.round(entry[0] * 255)));
+        data[i * 4 + 1] = Math.max(0, Math.min(255, Math.round(entry[1] * 255)));
+        data[i * 4 + 2] = Math.max(0, Math.min(255, Math.round(entry[2] * 255)));
+        data[i * 4 + 3] = 255;
+      }
+      return { size, data };
+    }
+    
+    // ----------------------------------------------------
+    // 4. Procedural Canvas Test Patterns
+    // ----------------------------------------------------
+    function drawProceduralImage(type, width = 1200, height = 900) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      
+      if (type === 'test_pattern') {
+        ctx.fillStyle = '#0f0f12'; ctx.fillRect(0, 0, width, height);
+        ctx.strokeStyle = '#1d1d26'; ctx.lineWidth = 1;
+        for (let x = 0; x < width; x += 40) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+        }
+        for (let y = 0; y < height; y += 40) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+        }
+        const colors = ['#ff0055', '#39ff14', '#00e5ff', '#ffcc00', '#ff00ff', '#ffffff'];
+        const barW = (width - 160) / colors.length;
+        colors.forEach((col, idx) => {
+          ctx.fillStyle = col; ctx.fillRect(80 + idx * barW, 100, barW, 200);
+        });
+        const g = ctx.createLinearGradient(80, 0, width - 80, 0);
+        g.addColorStop(0, '#000'); g.addColorStop(1, '#fff');
+        ctx.fillStyle = g; ctx.fillRect(80, height - 200, width - 160, 60);
+      } else if (type === 'sunset') {
+        const sky = ctx.createLinearGradient(0, 0, 0, height);
+        sky.addColorStop(0, '#100c26'); sky.addColorStop(0.5, '#a82c35'); sky.addColorStop(1, '#fac543');
+        ctx.fillStyle = sky; ctx.fillRect(0, 0, width, height);
+        ctx.beginPath(); ctx.arc(width * 0.7, height * 0.6, 90, 0, Math.PI * 2);
+        const sun = ctx.createRadialGradient(width*0.7, height*0.6, 0, width*0.7, height*0.6, 90);
+        sun.addColorStop(0, '#ffffff'); sun.addColorStop(1, 'rgba(255, 150, 40, 0)');
+        ctx.fillStyle = sun; ctx.fill();
+        ctx.fillStyle = '#0b0212'; ctx.beginPath(); ctx.moveTo(0, height); ctx.lineTo(0, height * 0.8);
+        for (let x = 0; x <= width; x += 20) {
+          ctx.lineTo(x, height * 0.8 - 40 * Math.sin(x * 0.005) - 10 * Math.sin(x * 0.03));
+        }
+        ctx.lineTo(width, height); ctx.fill();
+      } else if (type === 'cyberpunk') {
+        ctx.fillStyle = '#020409'; ctx.fillRect(0, 0, width, height);
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.2)'; ctx.lineWidth = 1;
+        const horizon = height * 0.6;
+        for (let x = -width; x < width * 2; x += 100) {
+          ctx.beginPath(); ctx.moveTo(x, height); ctx.lineTo(width/2, horizon); ctx.stroke();
+        }
+        ctx.fillStyle = '#ff0077'; ctx.beginPath(); ctx.arc(width/2, horizon, 100, Math.PI, 0); ctx.fill();
+      } else {
+        const b = ctx.createRadialGradient(width/2, height/2, 50, width/2, height/2, width*0.7);
+        b.addColorStop(0, '#5a4635'); b.addColorStop(1, '#0e0805');
+        ctx.fillStyle = b; ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = '#030202'; ctx.beginPath(); ctx.arc(width/2, height*0.6, 120, 0, Math.PI, true); ctx.fill();
+      }
+      return canvas.toDataURL('image/jpeg', 0.95);
+    }
+    
+    // ----------------------------------------------------
+    // 5. Complete Batch Development Client Application
+    // ----------------------------------------------------
+    let cameraIP = localStorage.getItem('p4_cam_ip') || '192.168.4.1';
+    let forceDemoMode = localStorage.getItem('p4_cam_force_demo') === 'true';
+    let activeMode = 'demo';
+    let pollingInterval = null;
+    let connectionEpoch = 0;
+    
+    let imagesList = [];
+    let mockImagesList = [
+      { filename: "sunset_dsc_0891.jpg", timestamp: Date.now() - 3600000 * 6.5, size: 2840911, type: "sunset" },
+      { filename: "IMG_0434.jpeg", timestamp: Date.now() - 3600000 * 6.0, size: 799406, type: "file", src: "./demo_photos/IMG_0434.jpeg" },
+      { filename: "IMG_1283.jpeg", timestamp: Date.now() - 3600000 * 5.5, size: 743906, type: "file", src: "./demo_photos/IMG_1283.jpeg" },
+      { filename: "cyberpunk_dsc_0892.jpg", timestamp: Date.now() - 3600000 * 5.0, size: 3120194, type: "cyberpunk" },
+      { filename: "IMG_4028.jpeg", timestamp: Date.now() - 3600000 * 4.5, size: 1288069, type: "file", src: "./demo_photos/IMG_4028.jpeg" },
+      { filename: "IMG_5502.jpeg", timestamp: Date.now() - 3600000 * 4.0, size: 844060, type: "file", src: "./demo_photos/IMG_5502.jpeg" },
+      { filename: "portrait_dsc_0893.jpg", timestamp: Date.now() - 3600000 * 3.5, size: 2459011, type: "portrait" },
+      { filename: "IMG_7976.jpeg", timestamp: Date.now() - 3600000 * 3.0, size: 8412599, type: "file", src: "./demo_photos/IMG_7976.jpeg" },
+      { filename: "IMG_8301.jpeg", timestamp: Date.now() - 3600000 * 2.5, size: 1537312, type: "file", src: "./demo_photos/IMG_8301.jpeg" },
+      { filename: "IMG_9921.jpeg", timestamp: Date.now() - 3600000 * 2.0, size: 2418596, type: "file", src: "./demo_photos/IMG_9921.jpeg" },
+      { filename: "IMG_9923.jpeg", timestamp: Date.now() - 3600000 * 1.5, size: 3842483, type: "file", src: "./demo_photos/IMG_9923.jpeg" },
+      { filename: "SCR-20260627-mnht.jpeg", timestamp: Date.now() - 3600000 * 1.0, size: 662108, type: "file", src: "./demo_photos/SCR-20260627-mnht.jpeg" },
+      { filename: "pattern_dsc_0894.jpg", timestamp: Date.now() - 400000, size: 1989010, type: "test_pattern" }
+    ];
+    const mockImageCache = {};
+    
+    let developedImages = []; // Stores { filename, url, blob }
+    let selectedLUT = 'identity';
+    let vintageEffectsEnabled = true;
+    let currentIntensity = 1.0;
+    
+    let customLUTData = null;
+    let customLUTSize = 0;
+    let customLUTName = '';
+    
+    let processor = null;
+    let currentImageURL = null;
+    let activeView = 'start';
+    
+    function switchView(viewName) {
+      activeView = viewName;
+      document.querySelectorAll('.view-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+      const targetPanel = document.getElementById(`${viewName}-panel`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      } else {
+        console.error(`Panel with ID ${viewName}-panel not found.`);
+      }
+    }
+    
+    // DOM Cache
+    const connLed = document.getElementById('conn-led');
+    const ipDisplay = document.getElementById('ip-display');
+    const cartridgeSummary = document.getElementById('cartridge-summary');
+    const cartridgeDetails = document.getElementById('cartridge-details');
+    const wifiInstructions = document.getElementById('wifi-instructions');
+    const btnStartDevelop = document.getElementById('btn-start-develop');
+    const btnReconnect = document.getElementById('btn-reconnect');
+    const undevelopedGrid = document.getElementById('undeveloped-grid');
+    
+    const batchIntensitySlider = document.getElementById('batch-intensity-slider');
+    const batchIntensityVal = document.getElementById('batch-intensity-val');
+    const batchGrainToggle = document.getElementById('batch-grain-toggle');
+    const batchGrainStatus = document.getElementById('batch-grain-status');
+    const styleExposureCount = document.getElementById('style-exposure-count');
+    
+    const finalGrid = document.getElementById('final-grid');
+    const finalLutsUsed = document.getElementById('final-luts-used');
+    
+    const previewModal = document.getElementById('preview-modal');
+    const previewModalImg = document.getElementById('preview-modal-img');
+    const previewTitle = document.getElementById('preview-title');
+    
+    // Lock layout viewport height dynamically to exact visible screen pixels to avoid iOS WebKit chin/bezel cropping
+    const doc = document.documentElement;
+    const updateVH = () => {
+      doc.style.setProperty('--vh', `${window.innerHeight}px`);
+    };
+    window.addEventListener('resize', updateVH);
+    window.addEventListener('orientationchange', updateVH);
+    updateVH();
+
+    let currentPreviewBlob = null;
+    let currentPreviewFilename = '';
+    
+    // Service worker registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(() => updateDiagnostics())
+        .catch(err => console.warn('Service Worker registration failed:', err));
+    }
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      updateDiagnostics();
+      
+      try {
+        processor = new WebGLProcessor(document.getElementById('gl-canvas'));
+        document.getElementById('diag-webgl2').textContent = 'ENABLED (GPU)';
+      } catch (err) {
+        showToast('WebGL2 init failed!', 'error');
+        document.getElementById('diag-webgl2').textContent = 'FAILED';
+      }
+      
+      showLoading('PRELOADING MOCK FILM CORES...');
+      setTimeout(() => {
+        mockImagesList.forEach(item => {
+          mockImageCache[item.filename] = drawProceduralImage(item.type);
+        });
+        hideLoading();
+        
+        document.getElementById('camera-ip').value = cameraIP;
+        document.getElementById('mock-mode-toggle').checked = forceDemoMode;
+        
+        validateCameraConnection();
+        setupEventListeners();
+      }, 50);
+    });
+    
+    function getCameraBaseURL() {
+      let host = cameraIP.trim();
+      if (!host) host = '192.168.4.1';
+      if (!/^https?:\/\//i.test(host)) {
+        host = 'http://' + host;
+      }
+      return host.replace(/\/+$/, '');
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeout = 5000, maxRetries = 3, epoch = null) {
+      let delay = 1000;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        const ctrl = new AbortController();
+        const id = setTimeout(() => ctrl.abort(), timeout);
+        try {
+          const res = await fetch(url, { ...options, signal: ctrl.signal });
+          clearTimeout(id);
+          if (!res.ok) throw new Error(`HTTP_${res.status}`);
+          return res;
+        } catch (err) {
+          clearTimeout(id);
+          console.warn(`Fetch attempt ${attempt} failed for ${url}:`, err);
+          if (attempt === maxRetries) {
+            if (epoch === null || epoch === connectionEpoch) {
+              handleFetchFailure(url, err);
+            }
+            throw err;
+          }
+          await new Promise(r => setTimeout(r, delay));
+          delay *= 2;
+        }
+      }
+    }
+
+    function handleFetchFailure(url, error) {
+      if (activeMode === 'local') return;
+      if (url.includes('/api/')) {
+        setConnectionState('demo');
+        cartridgeSummary.textContent = 'CAMERA CONNECTION LOST';
+        cartridgeDetails.textContent = `Sync failed on camera API: ${error.message}. Check Wi-Fi settings.`;
+        btnReconnect.style.display = 'block';
+        wifiInstructions.style.display = 'flex';
+      }
+    }
+
+    async function validateCameraConnection() {
+      const epoch = ++connectionEpoch;
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+      }
+      
+      if (forceDemoMode) {
+        setConnectionState('demo');
+        imagesList = [...mockImagesList];
+        
+        cartridgeSummary.textContent = 'DEMO FILM CARTRIDGE';
+        cartridgeDetails.textContent = `${imagesList.length} RAW EXPOSURES READY ON SIMULATED CART`;
+        btnStartDevelop.disabled = false;
+        btnReconnect.style.display = 'none';
+        wifiInstructions.style.display = 'none';
+        
+        renderUndevelopedSpool();
+        return;
+      }
+      
+      setConnectionState('connecting');
+      cartridgeSummary.textContent = 'LINKING TO CAMERA CARTRIDGE...';
+      cartridgeDetails.textContent = `Attempting ping at ${getCameraBaseURL()}/api/images...`;
+      btnStartDevelop.disabled = true;
+      btnReconnect.style.display = 'none';
+      wifiInstructions.style.display = 'none';
+      
+      try {
+        const pingURL = `${getCameraBaseURL()}/api/images`;
+        const res = await fetchWithTimeout(pingURL, { method: 'GET' }, 5000, 3, epoch);
+        if (res.ok) {
+          if (epoch !== connectionEpoch) return;
+          
+          setConnectionState('live');
+          imagesList = await res.json();
+          
+          cartridgeSummary.textContent = 'CARTRIDGE LINK ESTABLISHED';
+          cartridgeDetails.textContent = `${imagesList.length} RAW EXPOSURES DETECTED IN CAMERA STORAGE`;
+          btnStartDevelop.disabled = imagesList.length === 0;
+          btnReconnect.style.display = 'none';
+          wifiInstructions.style.display = 'none';
+        } else {
+          throw new Error('HTTP_ERROR');
+        }
+      } catch (err) {
+        if (epoch !== connectionEpoch) return;
+        
+        console.warn('Camera connectivity check failed, defaulting to Demo Mode.', err);
+        setConnectionState('demo');
+        imagesList = [...mockImagesList];
+        
+        cartridgeSummary.textContent = 'CAMERA DISCONNECTED';
+        cartridgeDetails.textContent = `Unable to link with camera IP: ${getCameraBaseURL()}. Polling Access Point...`;
+        btnStartDevelop.disabled = false;
+        btnReconnect.style.display = 'block';
+        wifiInstructions.style.display = 'flex';
+        
+        startConnectionPolling();
+      }
+      
+      renderUndevelopedSpool();
+    }
+
+    function startConnectionPolling() {
+      if (pollingInterval) clearInterval(pollingInterval);
+      pollingInterval = setInterval(async () => {
+        if (activeView !== 'start' || forceDemoMode || activeMode === 'live' || activeMode === 'local') {
+          clearInterval(pollingInterval);
+          pollingInterval = null;
+          return;
+        }
+        
+        try {
+          const pingURL = `${getCameraBaseURL()}/api/ping`;
+          const res = await fetch(pingURL, { method: 'GET', signal: AbortSignal.timeout(2000) });
+          if (res.ok) {
+            if (activeView !== 'start' || forceDemoMode || activeMode === 'live' || activeMode === 'local') return;
+            
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+            
+            showLoading('SYNCING SYSTEM SPOOL...');
+            const listURL = `${getCameraBaseURL()}/api/images`;
+            const listRes = await fetchWithTimeout(listURL, {}, 5000, 3);
+            imagesList = await listRes.json();
+            hideLoading();
+            
+            setConnectionState('live');
+            cartridgeSummary.textContent = 'CARTRIDGE LINK ESTABLISHED';
+            cartridgeDetails.textContent = `${imagesList.length} RAW EXPOSURES DETECTED IN CAMERA STORAGE`;
+            btnStartDevelop.disabled = imagesList.length === 0;
+            wifiInstructions.style.display = 'none';
+            
+            showToast('WIFI HANDSHAKE COMPLETED // SYNCED', 'success');
+            
+            styleExposureCount.textContent = imagesList.length;
+            switchView('style');
+          }
+        } catch (err) {
+          // Continue polling silently
+        }
+      }, 3000);
+    }
+    
+    function setConnectionState(state) {
+      activeMode = state;
+      connLed.className = 'led';
+      if (state === 'live') {
+        connLed.classList.add('online');
+        ipDisplay.textContent = 'ONLINE';
+        ipDisplay.style.color = 'var(--success)';
+      } else if (state === 'local') {
+        connLed.classList.add('offline');
+        ipDisplay.textContent = 'OFFLINE';
+        ipDisplay.style.color = 'var(--text-muted)';
+      } else if (state === 'demo') {
+        connLed.classList.add('offline');
+        ipDisplay.textContent = forceDemoMode ? 'DEMO' : 'OFFLINE';
+        ipDisplay.style.color = forceDemoMode ? 'var(--accent)' : 'var(--text-muted)';
+      } else {
+        connLed.classList.add('connecting');
+        ipDisplay.textContent = 'CONNECTING';
+        ipDisplay.style.color = 'var(--warning)';
+      }
+      updateDiagnostics();
+    }
+    
+    function renderUndevelopedSpool() {
+      undevelopedGrid.innerHTML = '';
+      const count = imagesList.length;
+      
+      for (let i = 0; i < count; i++) {
+        const item = imagesList[i];
+        const card = document.createElement('div');
+        card.className = 'gallery-card undeveloped-slot';
+        card.style.opacity = 0.35 + (i * 0.15);
+        
+        const sizeMB = item.size ? (item.size / (1024 * 1024)).toFixed(2) + ' MB' : '?.?? MB';
+        
+        card.innerHTML = `
+          <div class="thumb-wrapper" style="background: #060000; border: 1px dashed #441111; display: flex; align-items: center; justify-content: center;">
+            <span style="font-family: var(--font-mono); font-size: 10px; color: #ff3333; text-shadow: 0 0 4px #ff0000; font-weight: 700;">EXPOSURE_0${i+1}</span>
+          </div>
+          <div class="card-meta" style="border-top-color: #2b0808; background: #050000;">
+            <div class="card-meta-row">
+              <span class="img-name" style="color: #ff3333; font-weight: 700;">RAW_${item.filename.toUpperCase()}</span>
+              <span class="img-size" style="color: var(--accent); opacity: 0.6;">${sizeMB}</span>
+            </div>
+            <span class="img-time" style="color: #551111;">UNPROCESSED NEGATIVE STRIP</span>
+          </div>
+        `;
+        undevelopedGrid.appendChild(card);
+      }
+    }
+    
+    function loadImagePromise(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        if (src.startsWith('http')) {
+          img.crossOrigin = 'anonymous';
+        }
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Image decode failure. Check connection.'));
+        img.src = src;
+      });
+    }
+    
+    // Batch developer execution
+    async function executeBatchDevelopment() {
+      if (!processor) {
+        showToast('WebGL2 engine failed to initialize.', 'error');
+        return;
+      }
+      
+      if (selectedLUT === 'custom') {
+        if (!customLUTData) {
+          showToast('Import a custom .cube LUT file.', 'error');
+          return;
+        }
+        processor.setLUT(customLUTData, customLUTSize);
+      } else {
+        const size = 32;
+        const data = generatePresetLUT(selectedLUT, size);
+        processor.setLUT(data, size);
+      }
+      
+      processor.setGrainEnabled(vintageEffectsEnabled);
+      
+      const overlay = document.getElementById('darkroom-overlay');
+      const logActive = document.getElementById('darkroom-log-active');
+      overlay.classList.add('active');
+      
+      const writeLog = (text, delay = 200) => {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            const line = document.createElement('div');
+            line.className = 'darkroom-log-line';
+            line.textContent = `> ${text}`;
+            logActive.parentNode.insertBefore(line, logActive);
+            resolve();
+          }, delay);
+        });
+      };
+      
+      // Clean previous cache
+      developedImages.forEach(img => {
+        if (img.url) URL.revokeObjectURL(img.url);
+      });
+      developedImages = [];
+      
+      try {
+        await writeLog("CONNECTING TO REAGENT SCANNER...", 100);
+        await writeLog(`BATCH JOB STAGED: ${imagesList.length} RAW FILES`, 150);
+        await writeLog(`LUT EMULSION PRESET: ${selectedLUT.toUpperCase()}`, 150);
+        await writeLog(`GRAIN & VIGNETTE LAYER: ${vintageEffectsEnabled ? 'ON' : 'OFF'}`, 150);
+        
+        for (let i = 0; i < imagesList.length; i++) {
+          const item = imagesList[i];
+          await writeLog(`DEVELOPING FILM FRAME ${i+1}/${imagesList.length}: ${item.filename.toUpperCase()}...`, 200);
+          
+          let targetSrc = '';
+          let tempURLToRevoke = '';
+          
+          if (item.blob) {
+            tempURLToRevoke = URL.createObjectURL(item.blob);
+            targetSrc = tempURLToRevoke;
+          } else if (activeMode === 'live') {
+            const fileURL = `${getCameraBaseURL()}/api/images/${item.filename}`;
+            const res = await fetchWithTimeout(fileURL, {}, 5000, 3);
+            const blob = await res.blob();
+            tempURLToRevoke = URL.createObjectURL(blob);
+            targetSrc = tempURLToRevoke;
+          } else {
+            targetSrc = item.src || mockImageCache[item.filename] || drawProceduralImage(item.type);
+          }
+          
+          const img = await loadImagePromise(targetSrc);
+          
+          processor.setImage(img);
+          processor.render(currentIntensity);
+          
+          const processedBlob = await processor.exportBlob(0.95);
+          if (!processedBlob) throw new Error(`Empty frame buffer on ${item.filename}`);
+          
+          const devURL = URL.createObjectURL(processedBlob);
+          developedImages.push({
+            filename: item.filename,
+            url: devURL,
+            blob: processedBlob
+          });
+          
+          if (tempURLToRevoke) {
+            URL.revokeObjectURL(tempURLToRevoke);
+          }
+          img.src = '';
+        }
+        
+        await writeLog("SUCCESS: ALL FILM STRIPS PROCESSED", 200);
+        await new Promise(r => setTimeout(r, 600));
+        
+        overlay.classList.remove('active');
+        
+        document.querySelectorAll('.darkroom-log-line').forEach(l => {
+          if (l.id !== 'darkroom-log-active' && !l.style.color) {
+            l.remove();
+          }
+        });
+        
+        renderFinalSpool();
+        switchView('final');
+        showToast('BATCH DEVELOPMENT COMPLETED', 'success');
+      } catch (err) {
+        await writeLog("FATAL ERROR: PROCESS SUSPENDED", 200);
+        await writeLog(err.message.toUpperCase(), 150);
+        await new Promise(r => setTimeout(r, 1500));
+        overlay.classList.remove('active');
+        showToast('Development failed: ' + err.message, 'error');
+      }
+    }
+    
+    function renderFinalSpool() {
+      // 1. Sync LUT telemetry label
+      document.getElementById('final-luts-used').textContent = 'LUT: ' + selectedLUT.toUpperCase();
+      
+      // 2. Populate Grid View
+      const grid = document.getElementById('final-grid');
+      grid.innerHTML = '';
+      
+      // 3. Populate Slider Viewer View
+      const viewerGallery = document.getElementById('viewer-horizontal-gallery');
+      viewerGallery.innerHTML = '';
+      
+      developedImages.forEach((item, idx) => {
+        const sizeMB = (item.blob.size / (1024 * 1024)).toFixed(2) + ' MB';
+        
+        // --- Populate Grid Card ---
+        const card = document.createElement('div');
+        card.className = 'gallery-card';
+        card.addEventListener('click', () => openViewerAt(idx));
+        card.innerHTML = `
+          <div class="thumb-wrapper">
+            <img src="${item.url}" style="width: 100%; height: 100%; object-fit: cover;" class="loaded">
+          </div>
+          <div class="card-meta">
+            <div class="card-meta-row">
+              <span class="img-name">DEV_${item.filename.toUpperCase()}</span>
+              <span class="img-size" style="color: var(--accent);">${sizeMB}</span>
+            </div>
+            <span class="img-time">DEVELOPED FRAME // #${idx+1}</span>
+          </div>
+        `;
+        grid.appendChild(card);
+        
+        // --- Populate Carousel Slide ---
+        const slide = document.createElement('div');
+        slide.className = 'horizontal-slide';
+        slide.innerHTML = `
+          <div class="horizontal-slide-img-wrap" style="max-height: 60%;">
+            <img src="${item.url}" alt="Developed Slide">
+          </div>
+          <div class="slide-meta" style="margin-top: 15px;">
+            <div style="display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%;">
+              <button class="btn-shutter" style="max-width: 220px; font-size: 11px; padding: 8px 15px; height: 35px; box-shadow: none;" id="btn-save-slide-${idx}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                SAVE THIS PHOTO
+              </button>
+              
+              <div class="ios-note" style="max-width: 280px; font-size: 9px; padding: 6px 10px; margin: 0; border-color: rgba(255, 85, 0, 0.1); line-height: 1.3;">
+                <strong>iPhone PWA Roll Save:</strong> Touch & hold image to select Save to Photos.
+              </div>
+              
+              <div style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);">
+                <span>Size: ${sizeMB}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Bind single save button inside the slide
+        slide.querySelector(`#btn-save-slide-${idx}`).addEventListener('click', () => {
+          const url = URL.createObjectURL(item.blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `DEV_${item.filename}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 2000);
+          showToast(`SAVED DEV_${item.filename.toUpperCase()}`, 'success');
+        });
+        
+        viewerGallery.appendChild(slide);
+      });
+    }
+    
+    function openViewerAt(index) {
+      switchView('viewer');
+      
+      const gallery = document.getElementById('viewer-horizontal-gallery');
+      setTimeout(() => {
+        const slideWidth = gallery.getBoundingClientRect().width || window.innerWidth;
+        gallery.scrollLeft = index * slideWidth;
+        updateViewerHeader(index);
+      }, 50);
+    }
+    
+    function updateViewerHeader(index) {
+      if (developedImages.length === 0 || index < 0 || index >= developedImages.length) return;
+      const item = developedImages[index];
+      document.getElementById('viewer-title').textContent = `DEV_${item.filename.toUpperCase()}`;
+      document.getElementById('viewer-indicator').textContent = `${index + 1} OF ${developedImages.length}`;
+    }
+    
+    async function saveAllToDevice() {
+      if (developedImages.length === 0) return;
+      showLoading('DOWNLOADING BATCH TO PHONE...');
+      
+      try {
+        const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        
+        if (isIOS && isStandalone) {
+          showToast('iOS Standalone: Staggered download triggered. Check Files App!', 'info');
+        }
+        
+        for (let i = 0; i < developedImages.length; i++) {
+          const item = developedImages[i];
+          const url = URL.createObjectURL(item.blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `DEV_${item.filename}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          
+          setTimeout(() => URL.revokeObjectURL(url), 2000);
+          await new Promise(r => setTimeout(r, 450)); // Stagger loop to bypass mobile Safari download blocks
+        }
+        showToast('SAVED ALL RESOLVED IMAGES TO DISK', 'success');
+      } catch (err) {
+        showToast('Save failed: ' + err.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    function handleUSBImport(e) {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+      
+      connectionEpoch++;
+      
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+      }
+      
+      imagesList = Array.from(files).map((file) => {
+        return {
+          filename: file.name,
+          size: file.size,
+          timestamp: file.lastModified || Date.now(),
+          blob: file
+        };
+      });
+      
+      setConnectionState('local');
+      cartridgeSummary.textContent = 'LOCAL STORAGE MOUNTED';
+      cartridgeDetails.textContent = `${imagesList.length} EXPOSURES IMPORTED VIA FILE INGESTION`;
+      btnStartDevelop.disabled = imagesList.length === 0;
+      wifiInstructions.style.display = 'none';
+      
+      renderUndevelopedSpool();
+      showToast('USB-C FILES INGESTED SUCCESSFULLY', 'success');
+      
+      e.target.value = '';
+    }
+
+    function handleCustomLUTUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      showLoading('COMPILING CUBE DATA...');
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = parseCubeLUT(event.target.result);
+          customLUTData = parsed.data;
+          customLUTSize = parsed.size;
+          customLUTName = file.name.replace('.cube', '').toUpperCase();
+          
+          selectedLUT = 'custom';
+          
+          const customCard = document.getElementById('card-batch-custom');
+          customCard.querySelector('#batch-custom-title').textContent = customLUTName.substring(0, 10);
+          customCard.querySelector('.lut-card-desc').textContent = `Size: ${customLUTSize}³`;
+          
+          document.querySelectorAll('.lut-card').forEach(c => c.classList.remove('active'));
+          customCard.classList.add('active');
+          
+          showToast('CUSTOM LUT IMPORTED', 'success');
+        } catch (err) {
+          showToast('Failed parsing LUT: ' + err.message, 'error');
+        } finally {
+          hideLoading();
+        }
+      };
+      reader.readAsText(file);
+    }
+    
+    function setupEventListeners() {
+      // Configuration panel
+      document.getElementById('btn-settings-open').addEventListener('click', () => {
+        document.getElementById('camera-ip').value = cameraIP;
+        document.getElementById('mock-mode-toggle').checked = forceDemoMode;
+        document.getElementById('settings-modal').classList.add('active');
+      });
+      
+      document.getElementById('btn-settings-close').addEventListener('click', () => {
+        const ipInput = document.getElementById('camera-ip').value.trim();
+        const mockCheck = document.getElementById('mock-mode-toggle').checked;
+        let changed = false;
+        
+        if (ipInput && ipInput !== cameraIP) {
+          cameraIP = ipInput;
+          localStorage.setItem('p4_cam_ip', cameraIP);
+          changed = true;
+        }
+        if (mockCheck !== forceDemoMode) {
+          forceDemoMode = mockCheck;
+          localStorage.setItem('p4_cam_force_demo', forceDemoMode ? 'true' : 'false');
+          changed = true;
+        }
+        
+        document.getElementById('settings-modal').classList.remove('active');
+        if (changed) validateCameraConnection();
+      });
+      
+      // USB-C Import Action
+      document.getElementById('btn-usb-import').addEventListener('click', () => {
+        document.getElementById('usb-file-input').click();
+      });
+      document.getElementById('usb-file-input').addEventListener('change', handleUSBImport);
+      
+      document.getElementById('btn-hard-reset').addEventListener('click', async () => {
+        showLoading('RESETTING CORE ASSETS...');
+        try {
+          if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (let reg of regs) await reg.unregister();
+          }
+          const keys = await caches.keys();
+          for (let key of keys) await caches.delete(key);
+        } catch (err) {
+          console.warn(err);
+        } finally {
+          setTimeout(() => window.location.reload(true), 800);
+        }
+      });
+      
+      // Reconnect Action
+      btnReconnect.addEventListener('click', () => {
+        validateCameraConnection();
+      });
+      
+      // Start Develop Navigation
+      btnStartDevelop.addEventListener('click', () => {
+        styleExposureCount.textContent = imagesList.length;
+        switchView('style');
+      });
+      
+      // Cancel preset selection
+      document.getElementById('btn-style-back').addEventListener('click', () => {
+        switchView('start');
+      });
+      
+      // Preset cards choice
+      document.querySelectorAll('.lut-card').forEach(card => {
+        card.addEventListener('click', () => {
+          if (card.id === 'card-batch-custom') {
+            if (!customLUTData) {
+              document.getElementById('cube-file-input').click();
+              return;
+            }
+            document.querySelectorAll('.lut-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            selectedLUT = 'custom';
+            return;
+          }
+          document.querySelectorAll('.lut-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          selectedLUT = card.getAttribute('data-lut');
+        });
+      });
+      
+      document.getElementById('cube-file-input').addEventListener('change', handleCustomLUTUpload);
+      
+      // Effects toggle
+      batchGrainToggle.addEventListener('change', (e) => {
+        vintageEffectsEnabled = e.target.checked;
+        batchGrainStatus.textContent = vintageEffectsEnabled ? 'ON' : 'OFF';
+        batchGrainStatus.style.color = vintageEffectsEnabled ? 'var(--accent)' : 'var(--text-muted)';
+      });
+      
+      // Intensity slider
+      batchIntensitySlider.addEventListener('input', (e) => {
+        const val = e.target.value;
+        batchIntensityVal.textContent = val + '%';
+        currentIntensity = parseFloat(val) / 100.0;
+      });
+      
+      // Execute Batch
+      document.getElementById('btn-execute-batch').addEventListener('click', executeBatchDevelopment);
+      
+      // Download all
+      document.getElementById('btn-download-all').addEventListener('click', saveAllToDevice);
+      
+      // Redevelop (choose new style for same roll)
+      document.getElementById('btn-redevelop').addEventListener('click', () => {
+        switchView('style');
+      });
+      
+      // Reset spool (new roll from camera) with explicit warning
+      document.getElementById('btn-reset-roll').addEventListener('click', () => {
+        const proceed = confirm("WIPE CURRENT DEVELOPED SPOOL?\n\nThis will clear the developed photos from your screen. They will remain safe on your camera card.");
+        if (!proceed) return;
+        
+        developedImages.forEach(img => {
+          if (img.url) URL.revokeObjectURL(img.url);
+        });
+        developedImages = [];
+        filmDeveloped = false;
+        switchView('start');
+        validateCameraConnection();
+      });
+      
+      // Viewer Back
+      document.getElementById('btn-viewer-back').addEventListener('click', () => {
+        switchView('final');
+      });
+      
+      // Viewer actions (duplicates spool actions)
+      document.getElementById('btn-viewer-back-shutter').addEventListener('click', () => {
+        switchView('final');
+      });
+      document.getElementById('btn-viewer-download-all').addEventListener('click', saveAllToDevice);
+      document.getElementById('btn-viewer-redevelop').addEventListener('click', () => {
+        switchView('style');
+      });
+      document.getElementById('btn-viewer-reset-roll').addEventListener('click', () => {
+        document.getElementById('btn-reset-roll').click();
+      });
+      
+      // Swipe indicator track listener
+      const viewerGallery = document.getElementById('viewer-horizontal-gallery');
+      viewerGallery.addEventListener('scroll', () => {
+        const slideWidth = viewerGallery.getBoundingClientRect().width || window.innerWidth;
+        if (slideWidth > 0) {
+          const index = Math.round(viewerGallery.scrollLeft / slideWidth);
+          updateViewerHeader(index);
+        }
+      });
+      
+      // Preview modal closure
+      document.getElementById('btn-preview-close').addEventListener('click', () => {
+        previewModal.classList.remove('active');
+      });
+      
+      document.getElementById('btn-preview-download').addEventListener('click', () => {
+        if (!currentPreviewBlob) return;
+        const url = URL.createObjectURL(currentPreviewBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `DEV_${currentPreviewFilename}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        previewModal.classList.remove('active');
+      });
+    }
+    
+    function updateDiagnostics() {
+      const ua = navigator.userAgent;
+      let os = 'UNKNOWN';
+      if (/iPhone|iPad|iPod/.test(ua)) os = 'iOS';
+      else if (/Macintosh/.test(ua)) os = 'macOS';
+      else if (/Windows/.test(ua)) os = 'Windows';
+      else if (/Android/.test(ua)) os = 'Android';
+      document.getElementById('diag-os').textContent = os;
+      
+      const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+      document.getElementById('diag-standalone').textContent = isStandalone ? 'YES (PWA)' : 'NO (BROWSER)';
+      
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then(reg => {
+          const el = document.getElementById('diag-sw');
+          if (reg) {
+            el.textContent = 'ACTIVE';
+            el.style.color = 'var(--success)';
+          } else {
+            el.textContent = 'REGISTERING';
+            el.style.color = 'var(--warning)';
+          }
+        });
+      } else {
+        document.getElementById('diag-sw').textContent = 'UNSUPPORTED';
+      }
+      document.getElementById('diag-viewport').textContent = `${window.innerWidth} x ${window.innerHeight}`;
+    }
+    
+    function showLoading(text) {
+      document.getElementById('loading-text').textContent = text;
+      document.getElementById('loading-overlay').classList.add('active');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loading-overlay').classList.remove('active');
+    }
+    
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <span>${message}</span>
+        <span style="opacity: 0.5; margin-left: 15px; cursor: pointer;" onclick="this.parentElement.remove()">✕</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+</body>
+</html>
