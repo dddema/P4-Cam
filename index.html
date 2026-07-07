@@ -925,6 +925,18 @@
                 <div class="lut-card-title">B-400 BYPASS</div>
                 <div class="lut-card-desc">Bleach bypass cinematic</div>
               </div>
+              <div class="lut-card" data-lut="fuji_provia" style="height: 70px;">
+                <div class="lut-card-title">PROVIA 100</div>
+                <div class="lut-card-desc">Fuji Provia HaldCLUT</div>
+              </div>
+              <div class="lut-card" data-lut="kodak_gold" style="height: 70px;">
+                <div class="lut-card-title">GOLD 200</div>
+                <div class="lut-card-desc">Kodak Gold HaldCLUT</div>
+              </div>
+              <div class="lut-card" data-lut="portra_400" style="height: 70px;">
+                <div class="lut-card-title">PORTRA 400</div>
+                <div class="lut-card-desc">Kodak Portra HaldCLUT</div>
+              </div>
               <div class="lut-card" id="card-batch-custom" style="height: 70px; border-style: dashed;">
                 <div class="lut-card-title" id="batch-custom-title">+ IMPORT</div>
                 <div class="lut-card-desc">Load custom .cube</div>
@@ -941,6 +953,18 @@
             <label style="display: flex; align-items: center; cursor: pointer; gap: 8px;">
               <span id="batch-grain-status" style="font-family: var(--font-mono); font-size: 11px; color: var(--accent); font-weight: 700;">ON</span>
               <input type="checkbox" id="batch-grain-toggle" checked style="width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;">
+            </label>
+          </div>
+          
+          <!-- Black Mist toggle -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 4px; padding: 15px; margin-top: -5px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-family: var(--font-sans); font-size: 13px; font-weight: 600;">BLACK MIST DIFFUSION</span>
+              <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">Cinematic highlight bloom & halo</span>
+            </div>
+            <label style="display: flex; align-items: center; cursor: pointer; gap: 8px;">
+              <span id="batch-mist-status" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); font-weight: 700;">OFF</span>
+              <input type="checkbox" id="batch-mist-toggle" style="width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;">
             </label>
           </div>
           
@@ -1145,6 +1169,7 @@
         
         this.lutSize = 16;
         this.grainEnabled = true; // Default ON
+        this.mistEnabled = false; // Default OFF
         this.initShaders();
         this.initBuffers();
         this.initTextures();
@@ -1165,6 +1190,7 @@
         
         const fsSource = `#version 300 es
           precision highp float;
+          precision highp sampler3D;
           
           in vec2 v_texCoord;
           out vec4 outColor;
@@ -1173,24 +1199,30 @@
           uniform highp sampler3D u_lut;
           uniform float u_lutSize;
           uniform float u_mix;
-          uniform float u_splitX; // -1.0 = no split, 0.0 to 1.0 split position
           
           uniform float u_grainEnabled; // 1.0 = active, 0.0 = bypassed
+          uniform float u_mistEnabled;  // 1.0 = active, 0.0 = bypassed
           uniform vec2 u_resolution; // Viewport resolution for pixel-perfect noise
           
-          // Pseudo-random noise hash
-          float pseudoNoise(vec2 co) {
-            return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+          // Sine-free hash function (extremely stable on mobile/Apple GPUs)
+          float sineFreeNoise(vec2 p) {
+            vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+            p3 += dot(p3, p3.yzx + 33.33);
+            return fract((p3.x + p3.y) * p3.z);
           }
           
           void main() {
+            // A. Clean texture sample (without chromatic aberration) for mixing at 0% intensity
+            vec4 cleanColor = texture(u_image, v_texCoord);
+            
             vec4 originalColor;
             
-            // 1. Chromatic Aberration: sample Red/Blue channels with positional offsets based on lens center distance
+            // B. Chromatic Aberration: sample Red/Blue channels with cubic radial offset relative to lens center
             if (u_grainEnabled > 0.5) {
               vec2 uvDistort = v_texCoord - vec2(0.5);
               float dist = length(uvDistort);
-              vec2 chromaticOffset = uvDistort * dist * 0.012; // scales with distance from center
+              // Cubic curve: pow(dist, 2.0) * uvDistort keeps the lens center sharp and intensifies edge fringing
+              vec2 chromaticOffset = uvDistort * pow(dist, 2.0) * 0.012;
               
               originalColor = vec4(
                 texture(u_image, v_texCoord - chromaticOffset).r,
@@ -1199,7 +1231,7 @@
                 texture(u_image, v_texCoord).a
               );
             } else {
-              originalColor = texture(u_image, v_texCoord);
+              originalColor = cleanColor;
             }
             
             // Map values to texture bounds to prevent interpolation edge bleed
@@ -1210,29 +1242,59 @@
             // Fetch graded color from 3D texture
             vec4 gradedColor = vec4(texture(u_lut, lutCoords).rgb, originalColor.a);
             
-            vec4 finalColor;
-            if (u_splitX >= 0.0) {
-              if (v_texCoord.x < u_splitX) {
-                finalColor = originalColor;
-              } else {
-                finalColor = gradedColor;
+            // C. Mix clean (unaberrated, raw) color and graded color based on mix intensity
+            vec4 finalColor = mix(cleanColor, gradedColor, u_mix);
+            
+            // D. Black Mist Diffusion Filter (dreamy highlight bloom & halo)
+            if (u_mistEnabled > 0.5) {
+              vec3 bloom = vec3(0.0);
+              float totalWeight = 0.0;
+              
+              // Dilated 3x3 grid for a wide, dreamy halo (8-pixel radius)
+              vec2 texelSize = 8.0 / u_resolution; 
+              
+              for (int dy = -1; dy <= 1; dy++) {
+                for (int dx = -1; dx <= 1; dx++) {
+                  vec2 offsetVal = vec2(float(dx), float(dy)) * texelSize;
+                  vec3 sampleCol = texture(u_image, v_texCoord + offsetVal).rgb;
+                  
+                  // Gaussian-like weight based on distance from center
+                  float weight = 1.0 - (abs(float(dx)) + abs(float(dy))) * 0.3;
+                  
+                  // Highlight extraction: exponential boost for bright light sources
+                  float luma = dot(sampleCol, vec3(0.299, 0.587, 0.114));
+                  float highlightFactor = pow(luma, 2.5) * 3.5; 
+                  
+                  bloom += sampleCol * weight * (1.0 + highlightFactor);
+                  totalWeight += weight * (1.0 + highlightFactor);
+                }
               }
-            } else {
-              finalColor = mix(originalColor, gradedColor, u_mix);
+              vec3 blurredRawColor = bloom / totalWeight;
+              
+              // Grade the blurred raw color using the 3D LUT
+              vec3 lutCoordsBlurred = clamp(blurredRawColor, 0.0, 1.0) * scale + offset;
+              vec3 blurredGradedColor = texture(u_lut, lutCoordsBlurred).rgb;
+              vec3 blurredColor = mix(blurredRawColor, blurredGradedColor, u_mix);
+              
+              // Apply mist blend strength, preserving shadow levels
+              float centerLuma = dot(finalColor.rgb, vec3(0.299, 0.587, 0.114));
+              float blendStrength = 0.38 * smoothstep(0.08, 0.6, centerLuma);
+              
+              finalColor.rgb = mix(finalColor.rgb, blurredColor, blendStrength);
             }
             
             // Post-processing pipeline (Vignette, Contrast, Split-Toning, Grain)
             if (u_grainEnabled > 0.5) {
-              // 2. Vintage lens vignette: smooth radial falloff
+              // 1. Vintage lens vignette: smooth radial falloff
               vec2 uv = v_texCoord - vec2(0.5);
               float dist = length(uv);
               float vignette = 1.0 - smoothstep(0.25, 0.75, dist) * 0.45;
               finalColor.rgb *= vignette;
               
-              // 3. Contrast boost: deliberately crush the deep shadows
+              // 2. Contrast boost: deliberately crush the deep shadows using smoothstep
               finalColor.rgb = smoothstep(0.06, 1.0, finalColor.rgb);
               
-              // 4. Warm split-toning multiplier (highlights to amber/yellow, midtones to warm gold)
+              // 3. Warm split-toning multiplier (highlights to amber/yellow, midtones to warm gold)
               float luma = dot(finalColor.rgb, vec3(0.299, 0.587, 0.114));
               vec3 highlightTint = vec3(1.0, 0.85, 0.6);
               vec3 midtoneTint = vec3(1.0, 0.92, 0.7);
@@ -1240,10 +1302,10 @@
               float tintFactor = smoothstep(0.0, 0.4, luma);
               finalColor.rgb = mix(finalColor.rgb, finalColor.rgb * tintColor, tintFactor);
               
-              // 5. Emulsion distribution: grain density decays in shadows/lights, peaks in midtones
+              // 4. Emulsion distribution: grain density decays in shadows/lights, peaks in midtones
               float grainStrength = 0.14 * (1.0 - 4.0 * (luma - 0.5) * (luma - 0.5));
               grainStrength = clamp(grainStrength, 0.0, 0.14);
-              float noise = pseudoNoise(v_texCoord * u_resolution) - 0.5;
+              float noise = sineFreeNoise(v_texCoord * u_resolution) - 0.5;
               finalColor.rgb += vec3(noise * grainStrength);
               
               finalColor.rgb = clamp(finalColor.rgb, 0.0, 1.0);
@@ -1274,8 +1336,8 @@
           lut: gl.getUniformLocation(this.program, 'u_lut'),
           lutSize: gl.getUniformLocation(this.program, 'u_lutSize'),
           mix: gl.getUniformLocation(this.program, 'u_mix'),
-          splitX: gl.getUniformLocation(this.program, 'u_splitX'),
           grainEnabled: gl.getUniformLocation(this.program, 'u_grainEnabled'),
+          mistEnabled: gl.getUniformLocation(this.program, 'u_mistEnabled'),
           resolution: gl.getUniformLocation(this.program, 'u_resolution')
         };
       }
@@ -1366,7 +1428,11 @@
         this.grainEnabled = enabled;
       }
       
-      render(mixVal = 1.0, splitX = -1.0) {
+      setMistEnabled(enabled) {
+        this.mistEnabled = enabled;
+      }
+      
+      render(mixVal = 1.0) {
         const gl = this.gl;
         
         gl.clearColor(0, 0, 0, 1);
@@ -1385,9 +1451,9 @@
         
         gl.uniform1f(this.uniforms.lutSize, this.lutSize);
         gl.uniform1f(this.uniforms.mix, mixVal);
-        gl.uniform1f(this.uniforms.splitX, splitX);
         
         gl.uniform1f(this.uniforms.grainEnabled, this.grainEnabled ? 1.0 : 0.0);
+        gl.uniform1f(this.uniforms.mistEnabled, this.mistEnabled ? 1.0 : 0.0);
         gl.uniform2f(this.uniforms.resolution, this.canvas.width, this.canvas.height);
         
         gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -1490,6 +1556,83 @@
         }
       }
       return data;
+    }
+    
+    // ----------------------------------------------------
+    // 3. Hald CLUT PNG Image Loader and 3D LUT Unpacker
+    // ----------------------------------------------------
+    const presetConfig = {
+      identity: { type: 'procedural' },
+      monochrome: { type: 'procedural' },
+      warm: { type: 'procedural' },
+      cool: { type: 'procedural' },
+      cinematic: { type: 'procedural' },
+      vintage: { type: 'procedural' },
+      bleach_bypass: { type: 'procedural' },
+      fuji_provia: { type: 'hald', url: './luts/fuji_provia.png' },
+      kodak_gold: { type: 'hald', url: './luts/kodak_gold.png' },
+      portra_400: { type: 'hald', url: './luts/portra_400.png' }
+    };
+
+    function unpackHaldCLUT(imageData) {
+      const W = imageData.width;
+      const H = imageData.height;
+      if (W !== H) throw new Error("CLUT image must be square.");
+      
+      const M = Math.round(Math.cbrt(W)); // Level (e.g., 12, 8, 5)
+      const N = M * M;                    // 3D LUT Size (e.g., 144, 64, 25)
+      if (M * N !== W) throw new Error("Unsupported Hald CLUT resolution.");
+      
+      const pixels = imageData.data;
+      const data3D = new Uint8Array(N * N * N * 4);
+      
+      for (let yImg = 0; yImg < W; yImg++) {
+        for (let xImg = 0; xImg < W; xImg++) {
+          const pixelIdx = (yImg * W + xImg) * 4;
+          
+          // Calculate 3D color channels from 2D pixel coordinates
+          const r = xImg % N;
+          const g = Math.floor(xImg / N) + (yImg % M) * M;
+          const b = Math.floor(yImg / M);
+          
+          const targetIdx = (b * N * N + g * N + r) * 4;
+          
+          data3D[targetIdx] = pixels[pixelIdx];       // R
+          data3D[targetIdx + 1] = pixels[pixelIdx + 1]; // G
+          data3D[targetIdx + 2] = pixels[pixelIdx + 2]; // B
+          data3D[targetIdx + 3] = 255;                  // A
+        }
+      }
+      return { data: data3D, size: N };
+    }
+
+    async function loadAndUnpackHaldCLUT(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+            const unpacked = unpackHaldCLUT(imageData);
+            
+            canvas.width = 1;
+            canvas.height = 1;
+            img.src = '';
+            
+            resolve(unpacked);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        img.onerror = () => reject(new Error(`Failed to load image at ${url}`));
+        img.src = url;
+      });
     }
     
     // ----------------------------------------------------
@@ -1623,6 +1766,7 @@
     let developedImages = []; // Stores { filename, url, blob }
     let selectedLUT = 'identity';
     let vintageEffectsEnabled = true;
+    let blackMistEnabled = false;
     let currentIntensity = 1.0;
     
     let customLUTData = null;
@@ -1660,6 +1804,8 @@
     const batchIntensityVal = document.getElementById('batch-intensity-val');
     const batchGrainToggle = document.getElementById('batch-grain-toggle');
     const batchGrainStatus = document.getElementById('batch-grain-status');
+    const batchMistToggle = document.getElementById('batch-mist-toggle');
+    const batchMistStatus = document.getElementById('batch-mist-status');
     const styleExposureCount = document.getElementById('style-exposure-count');
     
     const finalGrid = document.getElementById('final-grid');
@@ -1941,12 +2087,28 @@
         }
         processor.setLUT(customLUTData, customLUTSize);
       } else {
-        const size = 32;
-        const data = generatePresetLUT(selectedLUT, size);
-        processor.setLUT(data, size);
+        const config = presetConfig[selectedLUT];
+        if (config && config.type === 'hald') {
+          showLoading(`DECODING ${selectedLUT.toUpperCase()} EMULSION...`);
+          try {
+            const lutData = await loadAndUnpackHaldCLUT(config.url);
+            processor.setLUT(lutData.data, lutData.size);
+          } catch (err) {
+            console.error(err);
+            showToast(`Failed to load Hald CLUT: ${err.message}. Ensure file is in './luts/' folder.`, 'error');
+            hideLoading();
+            return;
+          }
+          hideLoading();
+        } else {
+          const size = 32;
+          const data = generatePresetLUT(selectedLUT, size);
+          processor.setLUT(data, size);
+        }
       }
       
       processor.setGrainEnabled(vintageEffectsEnabled);
+      processor.setMistEnabled(blackMistEnabled);
       
       const overlay = document.getElementById('darkroom-overlay');
       const logActive = document.getElementById('darkroom-log-active');
@@ -1975,6 +2137,7 @@
         await writeLog(`BATCH JOB STAGED: ${imagesList.length} RAW FILES`, 150);
         await writeLog(`LUT EMULSION PRESET: ${selectedLUT.toUpperCase()}`, 150);
         await writeLog(`GRAIN & VIGNETTE LAYER: ${vintageEffectsEnabled ? 'ON' : 'OFF'}`, 150);
+        await writeLog(`BLACK MIST DIFFUSION: ${blackMistEnabled ? 'ON' : 'OFF'}`, 150);
         
         for (let i = 0; i < imagesList.length; i++) {
           const item = imagesList[i];
@@ -2322,6 +2485,12 @@
         vintageEffectsEnabled = e.target.checked;
         batchGrainStatus.textContent = vintageEffectsEnabled ? 'ON' : 'OFF';
         batchGrainStatus.style.color = vintageEffectsEnabled ? 'var(--accent)' : 'var(--text-muted)';
+      });
+      
+      batchMistToggle.addEventListener('change', (e) => {
+        blackMistEnabled = e.target.checked;
+        batchMistStatus.textContent = blackMistEnabled ? 'ON' : 'OFF';
+        batchMistStatus.style.color = blackMistEnabled ? 'var(--accent)' : 'var(--text-muted)';
       });
       
       // Intensity slider

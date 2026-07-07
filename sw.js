@@ -1,4 +1,4 @@
-const CACHE_NAME = 'esp32-cam-pwa-v33';
+const CACHE_NAME = 'esp32-cam-pwa-v39';
 const ASSETS = [
   './',
   './index.html',
