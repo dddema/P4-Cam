@@ -979,11 +979,18 @@
                   <div class="lut-card-desc">Punchy rich autumn tones</div>
                 </div>
               </div>
-              <div class="lut-card" data-lut="superia_200_xpro" style="height: 65px;">
+              <div class="lut-card" data-lut="fuji_velvia" style="height: 65px;">
                 <div class="lut-card-preview"></div>
                 <div class="lut-card-info">
-                  <div class="lut-card-title">SUPERIA XPRO</div>
-                  <div class="lut-card-desc">Cool cross-processed teal</div>
+                  <div class="lut-card-title">VELVIA 100</div>
+                  <div class="lut-card-desc">Vibrant slide saturation</div>
+                </div>
+              </div>
+              <div class="lut-card" data-lut="fuji_800z" style="height: 65px;">
+                <div class="lut-card-preview"></div>
+                <div class="lut-card-info">
+                  <div class="lut-card-title">PRO 800Z</div>
+                  <div class="lut-card-desc">Cool highlights & skin</div>
                 </div>
               </div>
               <div class="lut-card" data-lut="portra_400" style="height: 65px;">
@@ -1648,7 +1655,8 @@
       kodak_gold: { type: 'hald', url: './luts/kodak_gold.png' },
       fuji_fp100c: { type: 'hald', url: './luts/Fuji FP-100c 2 -.png' },
       fuji_superia_400: { type: 'hald', url: './luts/fuji_superia_400_2.png' },
-      superia_200_xpro: { type: 'hald', url: './luts/Fuji Superia 200 XPRO.png' },
+      fuji_velvia: { type: 'hald', url: './luts/Fuji Velvia 100 Generic.png' },
+      fuji_800z: { type: 'hald', url: './luts/Fuji_800Z_2.png' },
       polaroid_690: { type: 'hald', url: './luts/Polaroid 690 3.png' }
     };
 
@@ -1722,7 +1730,8 @@
       fuji_provia: "Vibrant, high-fidelity daylight balance with clean cool shadows and rich color saturation. Exceptional for landscape and street scenes.",
       fuji_fp100c: "Vintage faded instant-film warmth. Features distinct creamy yellowed highlights, slightly desaturated midtones, and soft retro contrast.",
       fuji_superia_400: "Punchy print film emulation with rich autumn reds, vibrant greens, and deep dark shadows. Perfect for street scenes and foliage.",
-      superia_200_xpro: "Cool cross-processed slide film style with deep teal shadow shifts, saturated yellows, and a high-contrast vintage chemical look.",
+      fuji_velvia: "Ultra-saturated, high-contrast slide film simulation. Delivers punchy vivid greens, deep ocean blues, and high color density optimal for landscape photography.",
+      fuji_800z: "Professional high-speed film simulation. Offers rich, vibrant tones with distinct cool highlights, soft gentle shadow details, and clean portrait-optimized skin response.",
       polaroid_690: "Classic nostalgic retro instant contrast. Heavy warm midtones combined with slightly muddy, desaturated shadows and soft faded highlights.",
       custom: "Your custom imported 3D LUT profile applied in real-time over the raw frame."
     };
@@ -1861,6 +1870,115 @@
         if (tempURLToRevoke) {
           URL.revokeObjectURL(tempURLToRevoke);
         }
+      }
+    }
+    
+    async function regenerateCustomLUTPreview() {
+      if (presetPreviewURLs.length === 0) return;
+      
+      const item = imagesList[0];
+      if (!item) return;
+      
+      let targetSrc = '';
+      let tempURLToRevoke = '';
+      
+      if (item.blob) {
+        tempURLToRevoke = URL.createObjectURL(item.blob);
+        targetSrc = tempURLToRevoke;
+      } else if (item.src) {
+        targetSrc = item.src;
+      } else {
+        return;
+      }
+      
+      try {
+        const previewImg = await loadImagePromise(targetSrc);
+        
+        // Save current active state parameters
+        const originalW = processor.canvas.width;
+        const originalH = processor.canvas.height;
+        const savedGrain = processor.grainEnabled;
+        const savedMist = processor.mistEnabled;
+        
+        // Render large preview at 720x720 resolution
+        processor.canvas.width = 720;
+        processor.canvas.height = 720;
+        processor.gl.viewport(0, 0, 720, 720);
+        
+        // Apply active user settings
+        processor.setGrainEnabled(vintageEffectsEnabled);
+        processor.setMistEnabled(blackMistEnabled);
+        processor.setImage(previewImg);
+        
+        // Run processor with custom LUT
+        processor.setLUT(customLUTData, customLUTSize);
+        processor.render(currentIntensity);
+        
+        const processedBlob = await processor.exportBlob(0.90);
+        const devURL = URL.createObjectURL(processedBlob);
+        
+        // Custom card is the last preset card in the DOM
+        const cards = document.querySelectorAll('.lut-card');
+        const customIdx = cards.length - 1;
+        
+        // Revoke the old custom preview URL if it exists
+        if (presetPreviewURLs[customIdx]) {
+          URL.revokeObjectURL(presetPreviewURLs[customIdx]);
+        }
+        
+        // Save the new URL to the array
+        presetPreviewURLs[customIdx] = devURL;
+        
+        // Update the card thumbnail background image
+        const customCard = document.getElementById('card-batch-custom');
+        const previewDiv = customCard.querySelector('.lut-card-preview');
+        if (previewDiv) {
+          previewDiv.style.backgroundImage = `url(${devURL})`;
+          previewDiv.style.display = 'block';
+        }
+        
+        // Update or append the slide in the swiper gallery (#preset-preview-gallery)
+        const gallery = document.getElementById('preset-preview-gallery');
+        const existingSlide = gallery.querySelector('.horizontal-slide[data-lut="custom"]');
+        
+        const cardTitle = customLUTName.substring(0, 12);
+        const cardDesc = presetLongDescs['custom'];
+        
+        const slideHTML = `
+          <div class="horizontal-slide-img-wrap" style="max-height: 60%; width: 90%; aspect-ratio: 1; border: 1px solid var(--card-border); border-radius: 6px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <img src="${devURL}" style="width: 100%; height: 100%; object-fit: contain;" class="loaded">
+          </div>
+          <div style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 40px; text-align: center; width: 100%;">
+            <span style="font-family: var(--font-sans); font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px; text-transform: uppercase;">${cardTitle}</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; color: var(--accent); font-weight: 600; line-height: 1.4; max-width: 380px;">${cardDesc}</span>
+          </div>
+        `;
+        
+        if (existingSlide) {
+          existingSlide.innerHTML = slideHTML;
+          existingSlide.setAttribute('data-title', cardTitle);
+        } else {
+          const slide = document.createElement('div');
+          slide.className = 'horizontal-slide';
+          slide.setAttribute('data-lut', 'custom');
+          slide.setAttribute('data-title', cardTitle);
+          slide.innerHTML = slideHTML;
+          gallery.appendChild(slide);
+        }
+        
+        // Restore processor states & active selection
+        processor.canvas.width = originalW;
+        processor.canvas.height = originalH;
+        processor.gl.viewport(0, 0, originalW, originalH);
+        processor.setGrainEnabled(savedGrain);
+        processor.setMistEnabled(savedMist);
+        processor.setLUT(customLUTData, customLUTSize);
+        
+        if (tempURLToRevoke) {
+          URL.revokeObjectURL(tempURLToRevoke);
+        }
+      } catch (err) {
+        console.warn("Failed to regenerate custom LUT preview:", err);
       }
     }
     
@@ -2912,7 +3030,7 @@
       if (extension === 'cube') {
         showLoading('COMPILING CUBE DATA...');
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
           try {
             const parsed = parseCubeLUT(event.target.result);
             customLUTData = parsed.data;
@@ -2920,6 +3038,12 @@
             customLUTName = file.name.replace('.cube', '').toUpperCase();
             
             selectedLUT = 'custom';
+            
+            if (presetPreviewURLs.length > 0) {
+              await regenerateCustomLUTPreview();
+            } else {
+              resetLutCardPreviews();
+            }
             
             const customCard = document.getElementById('card-batch-custom');
             customCard.querySelector('#batch-custom-title').textContent = customLUTName.substring(0, 12);
@@ -2940,7 +3064,7 @@
         showLoading('DECODING HALDCLUT IMAGE...');
         const url = URL.createObjectURL(file);
         const img = new Image();
-        img.onload = () => {
+        img.onload = async () => {
           try {
             const canvas = document.createElement('canvas');
             canvas.width = img.width;
@@ -2956,6 +3080,12 @@
             customLUTName = file.name.substring(0, file.name.lastIndexOf('.')).toUpperCase();
             
             selectedLUT = 'custom';
+            
+            if (presetPreviewURLs.length > 0) {
+              await regenerateCustomLUTPreview();
+            } else {
+              resetLutCardPreviews();
+            }
             
             const customCard = document.getElementById('card-batch-custom');
             customCard.querySelector('#batch-custom-title').textContent = customLUTName.substring(0, 12);
@@ -3169,6 +3299,13 @@
             }
           }
           idx++;
+        });
+      }
+
+      function resetLutCardPreviews() {
+        document.querySelectorAll('.lut-card-preview').forEach(div => {
+          div.style.backgroundImage = 'none';
+          div.style.display = 'none';
         });
       }
 
