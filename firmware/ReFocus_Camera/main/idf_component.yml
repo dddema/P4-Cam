@@ -1,0 +1,28 @@
+dependencies:
+  idf: ">=5.4"
+
+  # Camera / video subsystem (from espressif/esp-video-components on the component registry)
+  esp_video:
+    version: ">=2.2,<3.0"
+
+  # Wi-Fi remote — required on ESP32-P4 which uses hosted Wi-Fi (co-processor architecture).
+  # Provides WIFI_INIT_CONFIG_DEFAULT and all CONFIG_ESP_WIFI_* Kconfig symbols.
+  espressif/esp_wifi_remote:
+    matches:
+      - if: "idf_version >= 6.0"
+        version: ">=1.6,<2.0"
+      - if: "idf_version < 6.0"
+        version: "*"
+
+  # Hosted driver — implements the SDIO communication channel and resets the slave chip.
+  espressif/esp_hosted:
+    matches:
+      - if: "idf_version >= 6.0"
+        version: ">=2.12,<3.0"
+      - if: "idf_version < 6.0"
+        version: "1.4.*"
+
+  # TinyUSB Device Stack for USB Mass Storage Class (MSC)
+  espressif/esp_tinyusb:
+    version: ">=0.15.0"
+

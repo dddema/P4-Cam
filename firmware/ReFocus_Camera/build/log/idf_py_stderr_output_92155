@@ -1,0 +1,10 @@
+Command: /Users/ddemarco/.espressif/tools/python/v6.0.2/venv/bin/python /Users/ddemarco/.espressif/v6.0.2/esp-idf/tools/idf_monitor.py -p /dev/cu.usbmodem5B7B0260871 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32p4 --revision 1 --decode-panic backtrace /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/ReFocus_Camera.elf /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader/bootloader.elf -m '/Users/ddemarco/.espressif/tools/python/v6.0.2/venv/bin/python' '/Users/ddemarco/.espressif/v6.0.2/esp-idf/tools/idf.py'
+[0;33m--- esp-idf-monitor 1.9.0 on /dev/cu.usbmodem5B7B0260871 115200[0m
+[0;33m--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H[0m
+[0m--- 0x4ff28ed0: [0;33mesp_bootloader_get_description[0m[0m at [0;32m/Users/ddemarco/.espressif/v6.0.2/esp-idf/components/esp_bootloader_format/esp_bootloader_desc.c[0m[0m:[1;31m40[0m
+[0m--- 0x4ff2bbd0: [0;33mis_xmc_chip_strict[0m[0m at [0;32m/Users/ddemarco/.espressif/v6.0.2/esp-idf/components/bootloader_support/bootloader_flash/src/bootloader_flash.c[0m[0m:[1;31m925[0m
+[0m--- 0x4ff28eda: [0;33mcall_start_cpu0[0m[0m at [0;32m/Users/ddemarco/.espressif/v6.0.2/esp-idf/components/bootloader/subproject/main/bootloader_start.c[0m[0m:[1;31m27[0m
+[0m--- 0x4ff28ed0: [0;33mesp_bootloader_get_description[0m[0m at [0;32m/Users/ddemarco/.espressif/v6.0.2/esp-idf/components/esp_bootloader_format/esp_bootloader_desc.c[0m[0m:[1;31m40[0m
+[0m--- 0x4ff2bbd0: [0;33mis_xmc_chip_strict[0m[0m at [0;32m/Users/ddemarco/.espressif/v6.0.2/esp-idf/components/bootloader_support/bootloader_flash/src/bootloader_flash.c[0m[0m:[1;31m925[0m
+[0m--- 0x4ff28eda: [0;33mcall_start_cpu0[0m[0m at [0;32m/Users/ddemarco/.espressif/v6.0.2/esp-idf/components/bootloader/subproject/main/bootloader_start.c[0m[0m:[1;31m27[0m
+[0m

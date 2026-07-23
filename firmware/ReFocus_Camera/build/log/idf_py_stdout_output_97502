@@ -1,0 +1,18 @@
+Command: ninja all
+[1/9] Performing build step for 'bootloader'
+[1/1] cd /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader && /Users/ddemarco/.espressif/tools/python/v6.0.2/venv/bin/python /Users/ddemarco/.espressif/v6.0.2/esp-idf/components/partition_table/check_sizes.py --offset 0xc000 bootloader 0x2000 /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader/bootloader.bin
+Bootloader binary size 0x5e10 bytes. 0x41f0 bytes (41%) free.
+[2/9] No install step for 'bootloader'
+[3/9] Completed 'bootloader'
+[4/9] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/sdcard.c.obj
+[5/9] Linking C static library esp-idf/main/libmain.a
+[6/9] Generating esp-idf/esp_system/ld/sections.ld
+[7/9] Linking CXX executable ReFocus_Camera.elf
+[8/9] Generating binary image from built executable
+esptool v5.3.1
+Creating ESP32-P4 image...
+Merged 4 ELF sections.
+Successfully created ESP32-P4 image.
+Generated /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/ReFocus_Camera.bin
+[9/9] cd /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build && /Users/ddemarco/.espressif/tools/python/v6.0.2/venv/bin/python /Users/ddemarco/.espressif/v6.0.2/esp-idf/components/partition_table/check_sizes.py --offset 0xc000 partition --type app /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/partition_table/partition-table.bin /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/ReFocus_Camera.bin
+ReFocus_Camera.bin binary size 0xbd750 bytes. Smallest app partition is 0x300000 bytes. 0x2428b0 bytes (75%) free.

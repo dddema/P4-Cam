@@ -1,0 +1,26 @@
+idf_component_register(
+    SRCS
+        "main.c"
+        "camera.c"
+        "sdcard.c"
+        "webserver.c"
+        "wifi_ap.c"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        esp_wifi
+        esp_http_server
+        esp_netif
+        esp_event
+        nvs_flash
+        driver
+        esp_timer
+        fatfs
+        sdmmc
+        esp_driver_sdmmc
+        esp_driver_jpeg
+        freertos
+        log
+        esp_hw_support
+        tinyusb
+)

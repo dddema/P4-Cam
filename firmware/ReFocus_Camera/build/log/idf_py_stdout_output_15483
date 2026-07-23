@@ -1,0 +1,554 @@
+Command: /Users/ddemarco/.espressif/tools/python/v6.0.2/venv/bin/python /Users/ddemarco/.espressif/v6.0.2/esp-idf/tools/idf_monitor.py -p /dev/cu.usbmodem5B7B0260871 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32p4 --revision 1 --decode-panic backtrace /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/ReFocus_Camera.elf /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader/bootloader.elf -m '/Users/ddemarco/.espressif/tools/python/v6.0.2/venv/bin/python' '/Users/ddemarco/.espressif/v6.0.2/esp-idf/tools/idf.py'
+
+[0;32mI (259) hex_psram: DriveStr.    : 0x00 (25 OhESP-ROM:esp32p4-eco2-20240710[0m
+Build:Jul 10 2024
+rst:0x1 (POWERON),boot:0x30f (SPI_FAST_FLASH_BOOT)
+SPI mode:DIO, clock div:1
+load:0x4ff33ce0,len:0x1738
+load:0x4ff28ed0,len:0xfb8
+load:0x4ff2bbd0,len:0x36cc
+entry 0x4ff28eda
+[0;32mI (25) boot: ESP-IDF v6.0.2 2nd stage bootloader[0m
+[0;32mI (26) boot: compile time Jul 15 2026 23:29:26[0m
+[0;32mI (26) boot: Multicore bootloader[0m
+[0;32mI (28) boot: chip revision: v1.3[0m
+[0;32mI (29) boot: efuse block revision: v0.3[0m
+[0;32mI (32) qio_mode: Enabling default flash chip QIO[0m
+[0;32mI (37) boot.esp32p4: SPI Speed      : 80MHz[0m
+[0;32mI (40) boot.esp32p4: SPI Mode       : QIO[0m
+[0;32mI (44) boot.esp32p4: SPI Flash Size : 16MB[0m
+[0;32mI (48) boot: Enabling RNG early entropy source...[0m
+[0;32mI (53) boot: Partition Table:[0m
+[0;32mI (55) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (61) boot:  0 nvs              WiFi data        01 02 0000d000 00006000[0m
+[0;32mI (68) boot:  1 phy_init         RF data          01 01 00013000 00001000[0m
+[0;32mI (74) boot:  2 factory          factory app      00 00 00020000 00300000[0m
+[0;32mI (82) boot: End of partition table[0m
+[0;32mI (84) esp_image: segment 0: paddr=00020020 vaddr=480a0020 size=44b0ch (281356) map[0m
+[0;32mI (133) esp_image: segment 1: paddr=00064b34 vaddr=30100000 size=00088h (   136) load[0m
+[0;32mI (134) esp_image: segment 2: paddr=00064bc4 vaddr=4ff00000 size=0b454h ( 46164) load[0m
+[0;32mI (145) esp_image: segment 3: paddr=00070020 vaddr=48000020 size=92560h (599392) map[0m
+[0;32mI (231) esp_image: segment 4: paddr=00102588 vaddr=4ff0b454 size=080dch ( 32988) load[0m
+[0;32mI (238) esp_image: segment 5: paddr=0010a66c vaddr=4ff13580 size=03fa4h ( 16292) load[0m
+[0;32mI (247) boot: Loaded app from partition at offset 0x20000[0m
+[0;32mI (247) boot: Disabling RNG early entropy source...[0m
+[0;32mI (258) hex_psram: vendor id    : 0x0d (AP)[0m
+[0;32mI (259) hex_psram: Latency      : 0x01 (Fixed)[0m
+[0;32mI (259) hex_psram: DriveStr.    : 0x00 (25 Ohm)[0m
+[0;32mI (259) hex_psram: dev id       : 0x03 (generation 4)[0m
+[0;32mI (264) hex_psram: density      : 0x07 (256 Mbit)[0m
+[0;32mI (269) hex_psram: good-die     : 0x06 (Pass)[0m
+[0;32mI (273) hex_psram: SRF          : 0x02 (Slow Refresh)[0m
+[0;32mI (278) hex_psram: BurstType    : 0x00 ( Wrap)[0m
+[0;32mI (282) hex_psram: BurstLen     : 0x03 (2048 Byte)[0m
+[0;32mI (286) hex_psram: BitMode      : 0x01 (X16 Mode)[0m
+[0;32mI (291) hex_psram: Readlatency  : 0x04 (14 cycles@Fixed)[0m
+[0;32mI (296) hex_psram: DriveStrength: 0x00 (1/1)[0m
+[0;32mI (300) MSPI Timing: Enter psram timing tuning[0m
+I esp_psram: Found 32MB PSRAM device
+I esp_psram: Speed: 200MHz
+[0;32mI (489) mmu_psram: .rodata xip on psram[0m
+[0;32mI (520) mmu_psram: .text xip on psram[0m
+[0;32mI (522) hex_psram: psram CS IO is dedicated[0m
+[0;32mI (522) cpu_start: Multicore app[0m
+[0;32mI (982) esp_psram: SPI SRAM memory test OK[0m
+[0;32mI (991) cpu_start: GPIO 38 and 37 are used as console UART I/O pins[0m
+[0;32mI (991) cpu_start: Pro cpu start user code[0m
+[0;32mI (992) cpu_start: cpu freq: 360000000 Hz[0m
+[0;32mI (993) app_init: Application information:[0m
+[0;32mI (997) app_init: Project name:     ReFocus_Camera[0m
+[0;32mI (1002) app_init: App version:      875f705-dirty[0m
+[0;32mI (1006) app_init: Compile time:     Jul 16 2026 01:33:05[0m
+[0;32mI (1011) app_init: ELF file SHA256:  6a9dae163...[0m
+[0;32mI (1016) app_init: ESP-IDF:          v6.0.2[0m
+[0;32mI (1020) efuse_init: Min chip rev:     v0.1[0m
+[0;32mI (1024) efuse_init: Max chip rev:     v1.99 [0m
+[0;32mI (1028) efuse_init: Chip rev:         v1.3[0m
+[0;32mI (1032) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (1038) heap_init: At 4FF1A200 len 00020DC0 (131 KiB): RETENT_RAM[0m
+[0;32mI (1044) heap_init: At 4FF3AFC0 len 00004BF0 (18 KiB): RAM[0m
+[0;32mI (1049) heap_init: At 4FF40000 len 00040000 (256 KiB): RAM[0m
+[0;32mI (1055) heap_init: At 50108080 len 00007F80 (31 KiB): RTCRAM[0m
+[0;32mI (1060) heap_init: At 30100088 len 00001F78 (7 KiB): SPM[0m
+[0;32mI (1065) esp_psram: Adding pool of 31808K of PSRAM memory to heap allocator[0m
+[0;32mI (1072) esp_psram: Adding pool of 54K of PSRAM memory gap generated due to end address alignment of irom to the heap allocator[0m
+[0;32mI (1083) esp_psram: Adding pool of 45K of PSRAM memory gap generated due to end address alignment of drom to the heap allocator[0m
+[0;32mI (1094) spi_flash: detected chip: gd[0m
+[0;32mI (1097) spi_flash: flash io: qio[0m
+[0;33mW (1100) spi_flash: Detected size(32768k) larger than the size in the binary image header(16384k). Using the size in the binary image header.[0m
+[0;32mI (1113) host_init: ESP Hosted : Host chip_ip[18][0m
+[0;32mI (1117) H_API: ESP-Hosted starting. Hosted_Tasks: prio:23, stack: 5120 RPC_task_stack: 5120[0m
+[0;32mI (1126) H_API: ** add_esp_wifi_remote_channels **[0m
+[0;32mI (1131) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (1136) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (1145) H_SDIO_DRV: sdio_data_to_rx_buf_task started[0m
+[0;32mI (1148) main_task: Started on CPU0[0m
+[0;32mI (1152) esp_psram: Reserving pool of 32K of internal memory for DMA/internal allocations[0m
+[0;32mI (1161) main_task: Calling app_main()[0m
+[0;32mI (1163) main: ════ ReFocus Camera firmware booting ════[0m
+[0;32mI (1181) sdcard: Initialized on-chip LDO Channel 4 for SD card power[0m
+[0;32mI (1181) sdcard: Mounting SD card …[0m
+Name: EB1QT
+Type: SDHC
+Speed: 20.00 MHz (limit: 20.00 MHz)
+Size: 30528MB
+CSD: ver=2, sector_size=512, capacity=62521344 read_bl_len=9
+SSR: bus_width=4
+[0;32mI (1235) sdcard: SD card mounted at /sdcard[0m
+[0;32mI (1243) transport: Attempt connection with slave: retry[0][0m
+[0;33mW (1244) H_SDIO_DRV: Reset slave using GPIO[54][0m
+[0;32mI (1247) os_wrapper_esp: GPIO [54] configured[0m
+[0;32mI (2772) sdio_wrapper: SDIO master: Slot 1, Data-Lines: 4-bit Freq(KHz)[40000 KHz][0m
+[0;32mI (2772) sdio_wrapper: GPIOs: CLK[18] CMD[19] D0[14] D1[15] D2[16] D3[17] Slave_Reset[54][0m
+[0;32mI (2776) sdio_wrapper: Queues: Tx[20] Rx[20] SDIO-Rx-Mode[1][0m
+[0;32mI (2824) sdio_wrapper: Function 0 Blocksize: 512[0m
+[0;32mI (2826) sdio_wrapper: Function 1 Blocksize: 512[0m
+[0;32mI (2926) H_SDIO_DRV: Card init success, TRANSPORT_RX_ACTIVE[0m
+[0;32mI (2926) transport: set_transport_state: 1[0m
+[0;32mI (2927) transport: Waiting for esp_hosted slave to be ready[0m
+[0;32mI (2945) H_SDIO_DRV: SDIO Host operating in STREAMING MODE[0m
+[0;32mI (2945) H_SDIO_DRV: Open data path at slave[0m
+[0;32mI (2945) H_SDIO_DRV: Starting SDIO process rx task[0m
+[0;32mI (2952) H_SDIO_DRV: Received ESP_PRIV_IF type message[0m
+[0;32mI (2952) transport: Received INIT event from ESP32 peripheral[0m
+[0;32mI (2957) transport: EVENT: 12[0m
+[0;32mI (2960) transport: Identified slave [esp32c6][0m
+[0;32mI (2964) transport: EVENT: 11[0m
+[0;32mI (2967) transport: capabilities: 0xd[0m
+[0;32mI (2970) transport: Features supported are:[0m
+[0;32mI (2974) transport: 	 * WLAN[0m
+[0;32mI (2977) transport: 	   - HCI over SDIO[0m
+[0;32mI (2980) transport: 	   - BLE only[0m
+[0;32mI (2984) transport: EVENT: 13[0m
+[0;33mW (2986) transport: Version mismatch: Host [2.12.0] > Co-proc [0.0.0] ==> Upgrade co-proc to avoid RPC timeouts[0m
+[0;32mI (2996) transport: ESP board type is : 13 [0m
+
+[0;32mI (3000) transport: Base transport is set-up, TRANSPORT_TX_ACTIVE[0m
+[0;32mI (3006) H_API: Transport active[0m
+[0;32mI (3009) transport: Slave chip Id[12][0m
+[0;32mI (3012) transport: raw_tp_dir[-], flow_ctrl: low[60] high[80][0m
+[0;32mI (3018) transport: transport_delayed_init[0m
+[0;32mI (3022) esp_cli: Registering command: crash[0m
+[0;32mI (3026) esp_cli: Registering command: reboot[0m
+[0;32mI (3030) esp_cli: Registering command: mem-dump[0m
+[0;32mI (3034) esp_cli: Registering command: task-dump[0m
+[0;32mI (3038) esp_cli: Registering command: cpu-dump[0m
+[0;32mI (3043) esp_cli: Registering command: heap-trace[0m
+[0;32mI (3047) esp_cli: Registering command: sock-dump[0m
+[0;32mI (3051) esp_cli: Registering command: host-power-save[0m
+[0;32mI (3056) hci_stub_drv: Host BT Support: Disabled[0m
+[0;32mI (3061) H_SDIO_DRV: Received INIT event[0m
+[0;32mI (3064) H_SDIO_DRV: Event type: 0x22[0m
+[0;32mI (3068) H_SDIO_DRV: Write thread started[0m
+[0;32mI (3145) RPC_WRAP: Coprocessor Boot-up[0m
+[0;32mI (3373) wifi_ap: AP started — SSID: "ReFocus-Cam"  IP: 192.168.4.1[0m
+[0;32mI (3383) RPC_WRAP: ESP Event: softap started[0m
+[0;32mI (3397) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1[0m
+[0;32mI (3878) webserver: HTTP server started on port 80[0m
+[0;32mI (3879) main: GPIO 35 configured as boot/capture button[0m
+[0;32mI (3880) main: ════ ReFocus Camera ready — AP: "ReFocus-Cam" ════[0m
+[0;32mI (3884) main: Connect to the AP and open http://192.168.4.1[0m
+[0;32mI (3890) main_task: Returned from app_main()[0m
+[0;32mI (13239) main: 📸 Boot button pressed — capturing …[0m
+[0;32mI (13240) ov5647: Detected Camera sensor PID=0x5647[0m
+[0;32mI (13300) camera: Camera driver: MIPI-CSI  card: MIPI-CSI[0m
+[0;32mI (13300) camera: Camera format set to RGB565 (1920x1080)[0m
+[1;31mE (13302) esp_video_cam: ctrl id=980901 is not supported[0m
+[1;31mE (13304) esp_video: video->ops->set_ext_ctrl=106[0m
+[0;33mW (13309) camera: Failed to set Contrast/Saturation/Denoise settings: 3[0m
+[0;32mI (13315) camera: Camera ready[0m
+[0;32mI (13418) camera: Flushing V4L2 queue to discard stale startup frames...[0m
+[0;32mI (13700) camera: Frame captured: buf[1] 4147200 bytes raw RGB565[0m
+[0;32mI (13796) camera: Camera deinitialized[0m
+[0;32mI (13797) sdcard: Writing 2761574 bytes → /sdcard/img_008.jpg[0m
+[0;32mI (27383) sdcard: Saved /sdcard/img_008.jpg (2761574 bytes)[0m
+[0;32mI (27383) main: ✅ Saved /sdcard/img_008.jpg[0m
+[0;32mI (27383) main: 📸 Boot button pressed — capturing …[0m
+[0;33mW (27386) esp_video_init: ISP video device is already initialized[0m
+[0;32mI (27392) camera: Camera driver: MIPI-CSI  card: MIPI-CSI[0m
+[0;32mI (27397) camera: Camera format set to RGB565 (1920x1080)[0m
+[1;31mE (27404) esp_video_cam: ctrl id=980901 is not supported[0m
+[1;31mE (27407) esp_video: video->ops->set_ext_ctrl=106[0m
+[0;33mW (27412) camera: Failed to set Contrast/Saturation/Denoise settings: 3[0m
+[0;32mI (27418) camera: Camera ready[0m
+[0;32mI (27521) camera: Flushing V4L2 queue to discard stale startup frames...[0m
+[0;32mI (27802) camera: Frame captured: buf[1] 4147200 bytes raw RGB565[0m
+[0;32mI (27915) camera: Camera deinitialized[0m
+[0;32mI (27917) sdcard: Writing 4027988 bytes → /sdcard/img_009.jpg[0m
+[0;32mI (32155) sdcard: Saved /sdcard/img_009.jpg (4027988 bytes)[0m
+[0;32mI (32155) main: ✅ Saved /sdcard/img_009.jpg[0m
+[0;32mI (32155) main: 📸 Boot button pressed — capturing …[0m
+[0;33mW (32158) esp_video_init: ISP video device is already initialized[0m
+[0;32mI (32164) camera: Camera driver: MIPI-CSI  card: MIPI-CSI[0m
+[0;32mI (32169) camera: Camera format set to RGB565 (1920x1080)[0m
+[1;31mE (32176) esp_video_cam: ctrl id=980901 is not supported[0m
+[1;31mE (32179) esp_video: video->ops->set_ext_ctrl=106[0m
+[0;33mW (32184) camera: Failed to set Contrast/Saturation/Denoise settings: 3[0m
+[0;32mI (32190) camera: Camera ready[0m
+[0;32mI (32293) camera: Flushing V4L2 queue to discard stale startup frames...[0m
+[0;32mI (32574) camera: Frame captured: buf[1] 4147200 bytes raw RGB565[0m
+[0;32mI (32687) camera: Camera deinitialized[0m
+[0;32mI (32689) sdcard: Writing 4010974 bytes → /sdcard/img_010.jpg[0m
+[0;32mI (33970) sdcard: Saved /sdcard/img_010.jpg (4010974 bytes)[0m
+[0;32mI (33970) main: ✅ Saved /sdcard/img_010.jpg[0m
+[0;32mI (33970) main: 📸 Boot button pressed — capturing …[0m
+[0;33mW (33973) esp_video_init: ISP video device is already initialized[0m
+[0;32mI (33979) camera: Camera driver: MIPI-CSI  card: MIPI-CSI[0m
+[0;32mI (33984) camera: Camera format set to RGB565 (1920x1080)[0m
+[1;31mE (33991) esp_video_cam: ctrl id=980901 is not supported[0m
+[1;31mE (33995) esp_video: video->ops->set_ext_ctrl=106[0m
+[0;33mW (33999) camera: Failed to set Contrast/Saturation/Denoise settings: 3[0m
+[0;32mI (34005) camera: Camera ready[0m
+[0;32mI (34108) camera: Flushing V4L2 queue to discard stale startup frames...[0m
+[0;32mI (34389) camera: Frame captured: buf[1] 4147200 bytes raw RGB565[0m
+[0;32mI (34502) camera: Camera deinitialized[0m
+[0;32mI (34504) sdcard: Writing 4023157 bytes → /sdcard/img_011.jpg[0m
+[0;32mI (35880) sdcard: Saved /sdcard/img_011.jpg (4023157 bytes)[0m
+[0;32mI (35880) main: ✅ Saved /sdcard/img_011.jpg[0m
+[0;32mI (35880) main: 📸 Boot button pressed — capturing …[0m
+[0;33mW (35883) esp_video_init: ISP video device is already initialized[0m
+[0;32mI (35889) camera: Camera driver: MIPI-CSI  card: MIPI-CSI[0m
+[0;32mI (35894) camera: Camera format set to RGB565 (1920x1080)[0m
+[1;31mE (35901) esp_video_cam: ctrl id=980901 is not supported[0m
+[1;31mE (35905) esp_video: video->ops->set_ext_ctrl=106[0m
+[0;33mW (35909) camera: Failed to set Contrast/Saturation/Denoise settings: 3[0m
+[0;32mI (35915) camera: Camera ready[0m
+[0;32mI (36018) camera: Flushing V4L2 queue to discard stale startup frames...[0m
+[0;32mI (36299) camera: Frame captured: buf[1] 4147200 bytes raw RGB565[0m
+[0;32mI (36412) camera: Camera deinitialized[0m
+[0;32mI (36414) sdcard: Writing 4014080 bytes → /sdcard/img_012.jpg[0m
+[0;32mI (37791) sdcard: Saved /sdcard/img_012.jpg (4014080 bytes)[0m
+[0;32mI (37792) main: ✅ Saved /sdcard/img_012.jpg[0m
+[0;32mI (37792) main: 📸 Boot button pressed — capturing …[0m
+[0;33mW (37795) esp_video_init: ISP video device is already initialized[0m
+[0;32mI (37801) camera: Camera driver: MIPI-CSI  card: MIPI-CSI[0m
+[0;32mI (37806) camera: Camera format set to RGB565 (1920x1080)[0m
+[1;31mE (37812) esp_video_cam: ctrl id=980901 is not supported[0m
+[1;31mE (37816) esp_video: video->ops->set_ext_ctrl=106[0m
+[0;33mW (37820) camera: Failed to set Contrast/Saturation/Denoise settings: 3[0m
+[0;32mI (37827) camera: Camera ready[0m
+[0;32mI (37930) camera: Flushing V4L2 queue to discard stale startup frames...[0m
+[0;32mI (38211) camera: Frame captured: buf[1] 4147200 bytes raw RGB565[0m
+[0;32mI (38324) camera: Camera deinitialized[0m
+[0;32mI (38325) sdcard: Writing 4020111 bytes → /sdcard/img_013.jpg[0m
+[0;32mI (39862) sdcard: Saved /sdcard/img_013.jpg (4020111 bytes)[0m
+[0;32mI (39862) main: ✅ Saved /sdcard/img_013.jpg[0m
+[0;32mI (64113) RPC_WRAP: ESP Event: SoftAP mode: station connected with MAC Addr 96:3d:cd:00:80:44[0m
+[0;32mI (64113) wifi_ap: Client connected — AID=1[0m
+[0;32mI (64202) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2[0m
+[0;32mI (65886) webserver: Discovered SD entry: '.Spotlight-V100', type: 2[0m
+[0;32mI (65886) webserver: Discovered SD entry: 'nihao.txt', type: 1[0m
+[0;32mI (65886) webserver: Discovered SD entry: 'foo.txt', type: 1[0m
+[0;32mI (65892) webserver: Discovered SD entry: 'test_photo_04.jpg', type: 1[0m
+[0;32mI (65898) webserver: Discovered SD entry: 'test_photo_04 copy.jpg', type: 1[0m
+[0;32mI (65905) webserver: Discovered SD entry: 'test_photo_04 copy 2.jpg', type: 1[0m
+[0;32mI (65912) webserver: Discovered SD entry: '.fseventsd', type: 2[0m
+[0;32mI (65917) webserver: Discovered SD entry: 'img_001.jpg', type: 1[0m
+[0;32mI (65923) webserver: Discovered SD entry: 'img_002.jpg', type: 1[0m
+[0;32mI (65929) webserver: Discovered SD entry: 'img_003.jpg', type: 1[0m
+[0;32mI (65934) webserver: Discovered SD entry: 'img_004.jpg', type: 1[0m
+[0;32mI (65940) webserver: Discovered SD entry: 'img_005.jpg', type: 1[0m
+[0;32mI (65946) webserver: Discovered SD entry: 'img_006.jpg', type: 1[0m
+[0;32mI (65952) webserver: Discovered SD entry: 'img_007.jpg', type: 1[0m
+[0;32mI (65957) webserver: Discovered SD entry: 'img_008.jpg', type: 1[0m
+[0;32mI (65963) webserver: Discovered SD entry: 'img_009.jpg', type: 1[0m
+[0;32mI (65969) webserver: Discovered SD entry: 'img_010.jpg', type: 1[0m
+[0;32mI (65974) webserver: Discovered SD entry: 'img_011.jpg', type: 1[0m
+[0;32mI (65980) webserver: Discovered SD entry: 'img_012.jpg', type: 1[0m
+[0;32mI (65986) webserver: Discovered SD entry: 'img_013.jpg', type: 1[0m
+[0;32mI (70957) webserver: Image requested (raw): img_001.jpg -> (decoded): img_001.jpg[0m
+[0;32mI (70972) webserver: Sent img_001.jpg (36985 bytes)[0m
+[0;32mI (70974) webserver: Image requested (raw): img_002.jpg -> (decoded): img_002.jpg[0m
+[0;32mI (70987) webserver: Sent img_002.jpg (35870 bytes)[0m
+[0;32mI (70988) webserver: Image requested (raw): img_003.jpg -> (decoded): img_003.jpg[0m
+[0;32mI (71021) webserver: Sent img_003.jpg (73129 bytes)[0m
+[0;32mI (71023) webserver: Image requested (raw): img_007.jpg -> (decoded): img_007.jpg[0m
+[0;32mI (71061) webserver: Sent img_007.jpg (91847 bytes)[0m
+[0;32mI (71062) webserver: Image requested (raw): img_004.jpg -> (decoded): img_004.jpg[0m
+[0;32mI (71077) webserver: Sent img_004.jpg (36141 bytes)[0m
+[0;32mI (71079) webserver: Image requested (raw): img_008.jpg -> (decoded): img_008.jpg[0m
+[0;32mI (74784) webserver: Sent img_008.jpg (2761574 bytes)[0m
+[0;32mI (74785) webserver: Image requested (raw): img_005.jpg -> (decoded): img_005.jpg[0m
+[0;32mI (74813) webserver: Sent img_005.jpg (69837 bytes)[0m
+[0;32mI (74814) webserver: Image requested (raw): img_010.jpg -> (decoded): img_010.jpg[0m
+[0;32mI (78796) webserver: Sent img_010.jpg (4010974 bytes)[0m
+[0;32mI (78797) webserver: Image requested (raw): img_012.jpg -> (decoded): img_012.jpg[0m
+[0;32mI (83258) webserver: Sent img_012.jpg (4014080 bytes)[0m
+[0;32mI (83259) webserver: Image requested (raw): img_011.jpg -> (decoded): img_011.jpg[0m
+[0;32mI (89006) webserver: Sent img_011.jpg (4023157 bytes)[0m
+[0;32mI (89007) webserver: Image requested (raw): img_006.jpg -> (decoded): img_006.jpg[0m
+[0;32mI (89030) webserver: Sent img_006.jpg (68561 bytes)[0m
+[0;32mI (89031) webserver: Image requested (raw): test_photo_04%20copy.jpg -> (decoded): test_photo_04 copy.jpg[0m
+[0;32mI (91744) webserver: Sent test_photo_04 copy.jpg (3392676 bytes)[0m
+[0;32mI (91745) webserver: Image requested (raw): img_013.jpg -> (decoded): img_013.jpg[0m
+[0;32mI (94823) webserver: Sent img_013.jpg (4020111 bytes)[0m
+[0;32mI (94823) webserver: Image requested (raw): test_photo_04.jpg -> (decoded): test_photo_04.jpg[0m
+[0;32mI (97227) webserver: Sent test_photo_04.jpg (3392676 bytes)[0m
+[0;32mI (97229) webserver: Image requested (raw): img_009.jpg -> (decoded): img_009.jpg[0m
+[0;32mI (99957) webserver: Sent img_009.jpg (4027988 bytes)[0m
+[0;32mI (99957) webserver: Image requested (raw): test_photo_04%20copy%202.jpg -> (decoded): test_photo_04 copy 2.jpg[0m
+[0;32mI (102655) webserver: Sent test_photo_04 copy 2.jpg (3392676 bytes)[0m
+[0;32mI (102656) webserver: Image requested (raw): img_011.jpg -> (decoded): img_011.jpg[0m
+[0;32mI (105801) webserver: Sent img_011.jpg (4023157 bytes)[0m
+[0;32mI (105802) webserver: Image requested (raw): img_013.jpg -> (decoded): img_013.jpg[0m
+[0;32mI (107389) webserver: Sent img_013.jpg (4020111 bytes)[0m
+[0;32mI (107390) webserver: Image requested (raw): img_009.jpg -> (decoded): img_009.jpg[0m
+[0;32mI (110474) webserver: Sent img_009.jpg (4027988 bytes)[0m
+[0;32mI (110476) webserver: Image requested (raw): test_photo_04%20copy%202.jpg -> (decoded): test_photo_04 copy 2.jpg[0m
+[0;32mI (113030) webserver: Sent test_photo_04 copy 2.jpg (3392676 bytes)[0m
+[0;32mI (113030) webserver: Image requested (raw): img_006.jpg -> (decoded): img_006.jpg[0m
+[0;32mI (113058) webserver: Sent img_006.jpg (68561 bytes)[0m
+[0;32mI (113059) webserver: Image requested (raw): test_photo_04.jpg -> (decoded): test_photo_04.jpg[0m
+[0;32mI (116900) webserver: Sent test_photo_04.jpg (3392676 bytes)[0m
+[0;32mI (116901) webserver: Image requested (raw): img_006.jpg -> (decoded): img_006.jpg[0m
+[0;32mI (116928) webserver: Sent img_006.jpg (68561 bytes)[0m
+[0;32mI (116929) webserver: Image requested (raw): img_011.jpg -> (decoded): img_011.jpg[0m
+[0;32mI (118447) webserver: Sent img_011.jpg (4023157 bytes)[0m
+[0;32mI (118448) webserver: Image requested (raw): img_013.jpg -> (decoded): img_013.jpg[0m
+[0;32mI (120020) webserver: Sent img_013.jpg (4020111 bytes)[0m
+[0;32mI (120021) webserver: Image requested (raw): test_photo_04%20copy.jpg -> (decoded): test_photo_04 copy.jpg[0m
+[0;32mI (123969) webserver: Sent test_photo_04 copy.jpg (3392676 bytes)[0m
+[0;32mI (123971) webserver: Image requested (raw): test_photo_04%20copy.jpg -> (decoded): test_photo_04 copy.jpg[0m
+[0;32mI (127984) webserver: Sent test_photo_04 copy.jpg (3392676 bytes)[0m
+[0;32mI (127986) webserver: Image requested (raw): test_photo_04.jpg -> (decoded): test_photo_04.jpg[0m
+[0;32mI (129334) webserver: Sent test_photo_04.jpg (3392676 bytes)[0m
+[0;32mI (129335) webserver: Image requested (raw): img_009.jpg -> (decoded): img_009.jpg[0m
+[0;32mI (133899) webserver: Sent img_009.jpg (4027988 bytes)[0m
+[0;32mI (133901) webserver: Discovered SD entry: '.Spotlight-V100', type: 2[0m
+[0;32mI (133901) webserver: Discovered SD entry: 'nihao.txt', type: 1[0m
+[0;32mI (133904) webserver: Discovered SD entry: 'foo.txt', type: 1[0m
+[0;32mI (133910) webserver: Discovered SD entry: 'test_photo_04.jpg', type: 1[0m
+[0;32mI (133916) webserver: Discovered SD entry: 'test_photo_04 copy.jpg', type: 1[0m
+[0;32mI (133923) webserver: Discovered SD entry: 'test_photo_04 copy 2.jpg', type: 1[0m
+[0;32mI (133931) webserver: Discovered SD entry: '.fseventsd', type: 2[0m
+[0;32mI (133936) webserver: Discovered SD entry: 'img_001.jpg', type: 1[0m
+[0;32mI (133942) webserver: Discovered SD entry: 'img_002.jpg', type: 1[0m
+[0;32mI (133948) webserver: Discovered SD entry: 'img_003.jpg', type: 1[0m
+[0;32mI (133953) webserver: Discovered SD entry: 'img_004.jpg', type: 1[0m
+[0;32mI (133959) webserver: Discovered SD entry: 'img_005.jpg', type: 1[0m
+[0;32mI (133965) webserver: Discovered SD entry: 'img_006.jpg', type: 1[0m
+[0;32mI (133971) webserver: Discovered SD entry: 'img_007.jpg', type: 1[0m
+[0;32mI (133976) webserver: Discovered SD entry: 'img_008.jpg', type: 1[0m
+[0;32mI (133982) webserver: Discovered SD entry: 'img_009.jpg', type: 1[0m
+[0;32mI (133988) webserver: Discovered SD entry: 'img_010.jpg', type: 1[0m
+[0;32mI (133994) webserver: Discovered SD entry: 'img_011.jpg', type: 1[0m
+[0;32mI (134000) webserver: Discovered SD entry: 'img_012.jpg', type: 1[0m
+[0;32mI (134006) webserver: Discovered SD entry: 'img_013.jpg', type: 1[0m
+[0;32mI (134012) webserver: Image requested (raw): test_photo_04%20copy%202.jpg -> (decoded): test_photo_04 copy 2.jpg[0m
+[0;32mI (135333) webserver: Sent test_photo_04 copy 2.jpg (3392676 bytes)[0m
+[0;32mI (135335) webserver: Discovered SD entry: '.Spotlight-V100', type: 2[0m
+[0;32mI (135335) webserver: Discovered SD entry: 'nihao.txt', type: 1[0m
+[0;32mI (135340) webserver: Discovered SD entry: 'foo.txt', type: 1[0m
+[0;32mI (135345) webserver: Discovered SD entry: 'test_photo_04.jpg', type: 1[0m
+[0;32mI (135352) webserver: Discovered SD entry: 'test_photo_04 copy.jpg', type: 1[0m
+[0;32mI (135358) webserver: Discovered SD entry: 'test_photo_04 copy 2.jpg', type: 1[0m
+[0;32mI (135366) webserver: Discovered SD entry: '.fseventsd', type: 2[0m
+[0;32mI (135371) webserver: Discovered SD entry: 'img_001.jpg', type: 1[0m
+[0;32mI (135377) webserver: Discovered SD entry: 'img_002.jpg', type: 1[0m
+[0;32mI (135383) webserver: Discovered SD entry: 'img_003.jpg', type: 1[0m
+[0;32mI (135388) webserver: Discovered SD entry: 'img_004.jpg', type: 1[0m
+[0;32mI (135394) webserver: Discovered SD entry: 'img_005.jpg', type: 1[0m
+[0;32mI (135400) webserver: Discovered SD entry: 'img_006.jpg', type: 1[0m
+[0;32mI (135406) webserver: Discovered SD entry: 'img_007.jpg', type: 1[0m
+[0;32mI (135412) webserver: Discovered SD entry: 'img_008.jpg', type: 1[0m
+[0;32mI (135417) webserver: Discovered SD entry: 'img_009.jpg', type: 1[0m
+[0;32mI (135423) webserver: Discovered SD entry: 'img_010.jpg', type: 1[0m
+[0;32mI (135429) webserver: Discovered SD entry: 'img_011.jpg', type: 1[0m
+[0;32mI (135435) webserver: Discovered SD entry: 'img_012.jpg', type: 1[0m
+[0;32mI (135441) webserver: Discovered SD entry: 'img_013.jpg', type: 1[0m
+[0;32mI (135450) webserver: Discovered SD entry: '.Spotlight-V100', type: 2[0m
+[0;32mI (135453) webserver: Discovered SD entry: 'nihao.txt', type: 1[0m
+[0;32mI (135458) webserver: Discovered SD entry: 'foo.txt', type: 1[0m
+[0;32mI (135464) webserver: Discovered SD entry: 'test_photo_04.jpg', type: 1[0m
+[0;32mI (135470) webserver: Discovered SD entry: 'test_photo_04 copy.jpg', type: 1[0m
+[0;32mI (135477) webserver: Discovered SD entry: 'test_photo_04 copy 2.jpg', type: 1[0m
+[0;32mI (135484) webserver: Discovered SD entry: '.fseventsd', type: 2[0m
+[0;32mI (135489) webserver: Discovered SD entry: 'img_001.jpg', type: 1[0m
+[0;32mI (135496) webserver: Discovered SD entry: 'img_002.jpg', type: 1[0m
+[0;32mI (135501) webserver: Discovered SD entry: 'img_003.jpg', type: 1[0m
+[0;32mI (135507) webserver: Discovered SD entry: 'img_004.jpg', type: 1[0m
+[0;32mI (135513) webserver: Discovered SD entry: 'img_005.jpg', type: 1[0m
+[0;32mI (135519) webserver: Discovered SD entry: 'img_006.jpg', type: 1[0m
+[0;32mI (135525) webserver: Discovered SD entry: 'img_007.jpg', type: 1[0m
+[0;32mI (135530) webserver: Discovered SD entry: 'img_008.jpg', type: 1[0m
+[0;32mI (135536) webserver: Discovered SD entry: 'img_009.jpg', type: 1[0m
+[0;32mI (135542) webserver: Discovered SD entry: 'img_010.jpg', type: 1[0m
+[0;32mI (135548) webserver: Discovered SD entry: 'img_011.jpg', type: 1[0m
+[0;32mI (135554) webserver: Discovered SD entry: 'img_012.jpg', type: 1[0m
+[0;32mI (135559) webserver: Discovered SD entry: 'img_013.jpg', type: 1[0m
+[0;32mI (135567) webserver: Discovered SD entry: '.Spotlight-V100', type: 2[0m
+[0;32mI (135571) webserver: Discovered SD entry: 'nihao.txt', type: 1[0m
+[0;32mI (135577) webserver: Discovered SD entry: 'foo.txt', type: 1[0m
+[0;32mI (135582) webserver: Discovered SD entry: 'test_photo_04.jpg', type: 1[0m
+[0;32mI (135589) webserver: Discovered SD entry: 'test_photo_04 copy.jpg', type: 1[0m
+[0;32mI (135596) webserver: Discovered SD entry: 'test_photo_04 copy 2.jpg', type: 1[0m
+[0;32mI (135603) webserver: Discovered SD entry: '.fseventsd', type: 2[0m
+[0;32mI (135608) webserver: Discovered SD entry: 'img_001.jpg', type: 1[0m
+[0;32mI (135614) webserver: Discovered SD entry: 'img_002.jpg', type: 1[0m
+[0;32mI (135620) webserver: Discovered SD entry: 'img_003.jpg', type: 1[0m
+[0;32mI (135626) webserver: Discovered SD entry: 'img_004.jpg', type: 1[0m
+[0;32mI (135631) webserver: Discovered SD entry: 'img_005.jpg', type: 1[0m
+[0;32mI (135637) webserver: Discovered SD entry: 'img_006.jpg', type: 1[0m
+[0;32mI (135643) webserver: Discovered SD entry: 'img_007.jpg', type: 1[0m
+[0;32mI (135649) webserver: Discovered SD entry: 'img_008.jpg', type: 1[0m
+[0;32mI (135655) webserver: Discovered SD entry: 'img_009.jpg', type: 1[0m
+[0;32mI (135661) webserver: Discovered SD entry: 'img_010.jpg', type: 1[0m
+[0;32mI (135666) webserver: Discovered SD entry: 'img_011.jpg', type: 1[0m
+[0;32mI (135672) webserver: Discovered SD entry: 'img_012.jpg', type: 1[0m
+[0;32mI (135678) webserver: Discovered SD entry: 'img_013.jpg', type: 1[0m
+[0;32mI (136549) RPC_WRAP: ESP Event: SoftAP mode: disconnected station[0m
+[0;32mI (136549) wifi_ap: Client disconnected — AID=1[0m
+[0;32mI (147980) RPC_WRAP: ESP Event: SoftAP mode: station connected with MAC Addr 96:3d:cd:00:80:44[0m
+[0;32mI (147980) wifi_ap: Client connected — AID=1[0m
+[0;32mI (148175) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2[0m
+[0;33mW (163043) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;33mW (164370) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;33mW (164515) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;33mW (164516) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;33mW (164753) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;32mI (173622) webserver: Image requested (raw): img_001.jpg -> (decoded): img_001.jpg[0m
+[0;32mI (173636) webserver: Sent img_001.jpg (36985 bytes)[0m
+[0;32mI (173639) webserver: Image requested (raw): img_002.jpg -> (decoded): img_002.jpg[0m
+[0;32mI (173654) webserver: Sent img_002.jpg (35870 bytes)[0m
+[0;32mI (173655) webserver: Image requested (raw): img_003.jpg -> (decoded): img_003.jpg[0m
+[0;32mI (173682) webserver: Sent img_003.jpg (73129 bytes)[0m
+[0;32mI (173685) webserver: Image requested (raw): img_007.jpg -> (decoded): img_007.jpg[0m
+[0;32mI (173726) webserver: Sent img_007.jpg (91847 bytes)[0m
+[0;32mI (173727) webserver: Image requested (raw): img_004.jpg -> (decoded): img_004.jpg[0m
+[0;32mI (173741) webserver: Sent img_004.jpg (36141 bytes)[0m
+[0;32mI (173742) webserver: Image requested (raw): img_008.jpg -> (decoded): img_008.jpg[0m
+[0;32mI (175966) webserver: Sent img_008.jpg (2761574 bytes)[0m
+[0;32mI (175967) webserver: Image requested (raw): img_005.jpg -> (decoded): img_005.jpg[0m
+[0;32mI (177454) webserver: Sent img_005.jpg (69837 bytes)[0m
+[0;32mI (177455) webserver: Image requested (raw): img_012.jpg -> (decoded): img_012.jpg[0m
+[0;32mI (180628) webserver: Sent img_012.jpg (4014080 bytes)[0m
+[0;32mI (180628) webserver: Image requested (raw): img_013.jpg -> (decoded): img_013.jpg[0m
+[0;32mI (182229) webserver: Sent img_013.jpg (4020111 bytes)[0m
+[0;32mI (182229) webserver: Image requested (raw): img_011.jpg -> (decoded): img_011.jpg[0m
+[0;32mI (185227) webserver: Sent img_011.jpg (4023157 bytes)[0m
+[0;32mI (185227) webserver: Image requested (raw): img_010.jpg -> (decoded): img_010.jpg[0m
+[0;32mI (187896) webserver: Sent img_010.jpg (4010974 bytes)[0m
+[0;32mI (187897) webserver: Image requested (raw): img_006.jpg -> (decoded): img_006.jpg[0m
+[0;32mI (187921) webserver: Sent img_006.jpg (68561 bytes)[0m
+[0;32mI (187923) webserver: Image requested (raw): test_photo_04%20copy.jpg -> (decoded): test_photo_04 copy.jpg[0m
+[0;32mI (190552) webserver: Sent test_photo_04 copy.jpg (3392676 bytes)[0m
+[0;32mI (190553) webserver: Image requested (raw): test_photo_04.jpg -> (decoded): test_photo_04.jpg[0m
+[0;32mI (194258) webserver: Sent test_photo_04.jpg (3392676 bytes)[0m
+[0;32mI (194259) webserver: Image requested (raw): img_009.jpg -> (decoded): img_009.jpg[0m
+[0;32mI (198133) webserver: Sent img_009.jpg (4027988 bytes)[0m
+[0;32mI (198135) webserver: Image requested (raw): test_photo_04%20copy%202.jpg -> (decoded): test_photo_04 copy 2.jpg[0m
+[0;32mI (201072) webserver: Sent test_photo_04 copy 2.jpg (3392676 bytes)[0m
+[0;32mI (201074) webserver: Image requested (raw): test_photo_04%20copy%202.jpg -> (decoded): test_photo_04 copy 2.jpg[0m
+[0;32mI (203453) webserver: Sent test_photo_04 copy 2.jpg (3392676 bytes)[0m
+[0;32mI (203453) webserver: Image requested (raw): test_photo_04%20copy.jpg -> (decoded): test_photo_04 copy.jpg[0m
+[0;32mI (204762) webserver: Sent test_photo_04 copy.jpg (3392676 bytes)[0m
+[0;32mI (204763) webserver: Image requested (raw): test_photo_04.jpg -> (decoded): test_photo_04.jpg[0m
+[0;32mI (206049) webserver: Sent test_photo_04.jpg (3392676 bytes)[0m
+[0;32mI (206049) webserver: Image requested (raw): img_010.jpg -> (decoded): img_010.jpg[0m
+[0;32mI (208968) webserver: Sent img_010.jpg (4010974 bytes)[0m
+[0;32mI (208969) webserver: Image requested (raw): img_006.jpg -> (decoded): img_006.jpg[0m
+[0;32mI (208996) webserver: Sent img_006.jpg (68561 bytes)[0m
+[0;32mI (208998) webserver: Image requested (raw): img_006.jpg -> (decoded): img_006.jpg[0m
+[0;32mI (209033) webserver: Sent img_006.jpg (68561 bytes)[0m
+[0;32mI (209035) webserver: Image requested (raw): img_010.jpg -> (decoded): img_010.jpg[0m
+[0;32mI (210622) webserver: Sent img_010.jpg (4010974 bytes)[0m
+[0;32mI (210623) webserver: Image requested (raw): test_photo_04%20copy%202.jpg -> (decoded): test_photo_04 copy 2.jpg[0m
+[0;32mI (213999) webserver: Sent test_photo_04 copy 2.jpg (3392676 bytes)[0m
+[0;32mI (214000) webserver: Image requested (raw): img_009.jpg -> (decoded): img_009.jpg[0m
+[0;32mI (216973) webserver: Sent img_009.jpg (4027988 bytes)[0m
+[0;32mI (216975) webserver: Image requested (raw): img_009.jpg -> (decoded): img_009.jpg[0m
+[0;32mI (219668) webserver: Sent img_009.jpg (4027988 bytes)[0m
+[0;32mI (219670) webserver: Discovered SD entry: '.Spotlight-V100', type: 2[0m
+[0;32mI (219671) webserver: Discovered SD entry: 'nihao.txt', type: 1[0m
+[0;32mI (219673) webserver: Discovered SD entry: 'foo.txt', type: 1[0m
+[0;32mI (219679) webserver: Discovered SD entry: 'test_photo_04.jpg', type: 1[0m
+[0;32mI (219686) webserver: Discovered SD entry: 'test_photo_04 copy.jpg', type: 1[0m
+[0;32mI (219692) webserver: Discovered SD entry: 'test_photo_04 copy 2.jpg', type: 1[0m
+[0;32mI (219700) webserver: Discovered SD entry: '.fseventsd', type: 2[0m
+[0;32mI (219705) webserver: Discovered SD entry: 'img_001.jpg', type: 1[0m
+[0;32mI (219711) webserver: Discovered SD entry: 'img_002.jpg', type: 1[0m
+[0;32mI (219717) webserver: Discovered SD entry: 'img_003.jpg', type: 1[0m
+[0;32mI (219722) webserver: Discovered SD entry: 'img_004.jpg', type: 1[0m
+[0;32mI (219728) webserver: Discovered SD entry: 'img_005.jpg', type: 1[0m
+[0;32mI (219734) webserver: Discovered SD entry: 'img_006.jpg', type: 1[0m
+[0;32mI (219740) webserver: Discovered SD entry: 'img_007.jpg', type: 1[0m
+[0;32mI (219745) webserver: Discovered SD entry: 'img_008.jpg', type: 1[0m
+[0;32mI (219751) webserver: Discovered SD entry: 'img_009.jpg', type: 1[0m
+[0;32mI (219757) webserver: Discovered SD entry: 'img_010.jpg', type: 1[0m
+[0;32mI (219763) webserver: Discovered SD entry: 'img_011.jpg', type: 1[0m
+[0;32mI (219769) webserver: Discovered SD entry: 'img_012.jpg', type: 1[0m
+[0;32mI (219775) webserver: Discovered SD entry: 'img_013.jpg', type: 1[0m
+[0;32mI (219783) webserver: Discovered SD entry: '.Spotlight-V100', type: 2[0m
+[0;32mI (219786) webserver: Discovered SD entry: 'nihao.txt', type: 1[0m
+[0;32mI (219792) webserver: Discovered SD entry: 'foo.txt', type: 1[0m
+[0;32mI (219797) webserver: Discovered SD entry: 'test_photo_04.jpg', type: 1[0m
+[0;32mI (219804) webserver: Discovered SD entry: 'test_photo_04 copy.jpg', type: 1[0m
+[0;32mI (219811) webserver: Discovered SD entry: 'test_photo_04 copy 2.jpg', type: 1[0m
+[0;32mI (219819) webserver: Discovered SD entry: '.fseventsd', type: 2[0m
+[0;32mI (219823) webserver: Discovered SD entry: 'img_001.jpg', type: 1[0m
+[0;32mI (219829) webserver: Discovered SD entry: 'img_002.jpg', type: 1[0m
+[0;32mI (219835) webserver: Discovered SD entry: 'img_003.jpg', type: 1[0m
+[0;32mI (219841) webserver: Discovered SD entry: 'img_004.jpg', type: 1[0m
+[0;32mI (219847) webserver: Discovered SD entry: 'img_005.jpg', type: 1[0m
+[0;32mI (219853) webserver: Discovered SD entry: 'img_006.jpg', type: 1[0m
+[0;32mI (219858) webserver: Discovered SD entry: 'img_007.jpg', type: 1[0m
+[0;32mI (219864) webserver: Discovered SD entry: 'img_008.jpg', type: 1[0m
+[0;32mI (219870) webserver: Discovered SD entry: 'img_009.jpg', type: 1[0m
+[0;32mI (219876) webserver: Discovered SD entry: 'img_010.jpg', type: 1[0m
+[0;32mI (219882) webserver: Discovered SD entry: 'img_011.jpg', type: 1[0m
+[0;32mI (219888) webserver: Discovered SD entry: 'img_012.jpg', type: 1[0m
+[0;32mI (219893) webserver: Discovered SD entry: 'img_013.jpg', type: 1[0m
+[0;32mI (219900) webserver: Image requested (raw): test_photo_04%20copy.jpg -> (decoded): test_photo_04 copy.jpg[0m
+[0;32mI (222640) webserver: Sent test_photo_04 copy.jpg (3392676 bytes)[0m
+[0;32mI (222641) webserver: Image requested (raw): test_photo_04.jpg -> (decoded): test_photo_04.jpg[0m
+[0;32mI (223973) webserver: Sent test_photo_04.jpg (3392676 bytes)[0m
+[0;32mI (223974) webserver: Image requested (raw): img_002.jpg -> (decoded): img_002.jpg[0m
+[0;32mI (223990) webserver: Sent img_002.jpg (35870 bytes)[0m
+[0;32mI (223993) webserver: Image requested (raw): img_003.jpg -> (decoded): img_003.jpg[0m
+[0;32mI (224021) webserver: Sent img_003.jpg (73129 bytes)[0m
+[0;32mI (224021) webserver: Image requested (raw): img_004.jpg -> (decoded): img_004.jpg[0m
+[0;32mI (224041) webserver: Sent img_004.jpg (36141 bytes)[0m
+[0;32mI (224041) webserver: Image requested (raw): img_005.jpg -> (decoded): img_005.jpg[0m
+[0;32mI (224069) webserver: Sent img_005.jpg (69837 bytes)[0m
+[0;32mI (224070) webserver: Image requested (raw): img_001.jpg -> (decoded): img_001.jpg[0m
+[0;32mI (224086) webserver: Sent img_001.jpg (36985 bytes)[0m
+[0;32mI (224087) webserver: Image requested (raw): img_007.jpg -> (decoded): img_007.jpg[0m
+[0;32mI (224125) webserver: Sent img_007.jpg (91847 bytes)[0m
+[0;32mI (224126) webserver: Image requested (raw): img_008.jpg -> (decoded): img_008.jpg[0m
+[0;32mI (227222) webserver: Sent img_008.jpg (2761574 bytes)[0m
+[0;32mI (227223) webserver: Image requested (raw): img_010.jpg -> (decoded): img_010.jpg[0m
+[0;32mI (228821) webserver: Sent img_010.jpg (4010974 bytes)[0m
+[0;32mI (228822) webserver: Image requested (raw): img_006.jpg -> (decoded): img_006.jpg[0m
+[0;32mI (228849) webserver: Sent img_006.jpg (68561 bytes)[0m
+[0;32mI (228850) webserver: Image requested (raw): img_013.jpg -> (decoded): img_013.jpg[0m
+[0;32mI (230485) webserver: Sent img_013.jpg (4020111 bytes)[0m
+[0;32mI (230486) webserver: Image requested (raw): test_photo_04%20copy%202.jpg -> (decoded): test_photo_04 copy 2.jpg[0m
+[0;32mI (233085) webserver: Sent test_photo_04 copy 2.jpg (3392676 bytes)[0m
+[0;32mI (233086) webserver: Image requested (raw): img_011.jpg -> (decoded): img_011.jpg[0m
+[0;32mI (234674) webserver: Sent img_011.jpg (4023157 bytes)[0m
+[0;32mI (234674) webserver: Image requested (raw): img_012.jpg -> (decoded): img_012.jpg[0m
+[0;32mI (236292) webserver: Sent img_012.jpg (4014080 bytes)[0m
+[0;32mI (236293) webserver: Image requested (raw): img_009.jpg -> (decoded): img_009.jpg[0m
+[0;32mI (239110) webserver: Sent img_009.jpg (4027988 bytes)[0m
+[0;32mI (239111) webserver: Image requested (raw): img_012.jpg -> (decoded): img_012.jpg[0m
+[0;32mI (242289) webserver: Sent img_012.jpg (4014080 bytes)[0m
+[0;32mI (242290) webserver: Image requested (raw): test_photo_04%20copy.jpg -> (decoded): test_photo_04 copy.jpg[0m
+[0;32mI (243620) webserver: Sent test_photo_04 copy.jpg (3392676 bytes)[0m
+[0;32mI (243622) webserver: Image requested (raw): test_photo_04%20copy.jpg -> (decoded): test_photo_04 copy.jpg[0m
+[0;32mI (246521) webserver: Sent test_photo_04 copy.jpg (3392676 bytes)[0m
+[0;32mI (246522) webserver: Image requested (raw): test_photo_04.jpg -> (decoded): test_photo_04.jpg[0m
+[0;32mI (249436) webserver: Sent test_photo_04.jpg (3392676 bytes)[0m
+[0;32mI (249438) webserver: Image requested (raw): img_009.jpg -> (decoded): img_009.jpg[0m
+[0;32mI (252589) webserver: Sent img_009.jpg (4027988 bytes)[0m
+[0;32mI (252589) webserver: Image requested (raw): test_photo_04.jpg -> (decoded): test_photo_04.jpg[0m
+[0;32mI (255169) webserver: Sent test_photo_04.jpg (3392676 bytes)[0m
+[0;32mI (255171) webserver: Image requested (raw): img_009.jpg -> (decoded): img_009.jpg[0m
+[0;32mI (256727) webserver: Sent img_009.jpg (4027988 bytes)[0m
+[0;32mI (256728) webserver: Image requested (raw): test_photo_04.jpg -> (decoded): test_photo_04.jpg[0m
+[0;32mI (258070) webserver: Sent test_photo_04.jpg (3392676 bytes)[0m
+[0;33mW (275573) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;33mW (278487) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;33mW (281743) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;33mW (284230) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;33mW (285754) httpd_txrx: httpd_sock_err: error in recv : 104[0m
+[0;33mW (288501) httpd_txrx: httpd_sock_err: error in recv : 104[0m

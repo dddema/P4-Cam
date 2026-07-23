@@ -1389,6 +1389,30 @@
     </div>
   </div>
   
+  <!-- Reset Roll Confirmation Modal -->
+  <div class="modal-overlay" id="confirm-reset-modal">
+    <div class="modal-content" style="max-width: 400px; padding: 25px; gap: 15px; position: relative;">
+      <button id="btn-confirm-reset-cancel-cross" style="position: absolute; top: 22px; right: 25px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--card-border); background: rgba(255,255,255,0.03); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease-in-out;" title="Cancel" onmouseover="this.style.color='var(--accent)'; this.style.borderColor='var(--accent)'; this.style.backgroundColor='var(--accent-glow-ultralight)'" onmouseout="this.style.color='var(--text-muted)'; this.style.borderColor='var(--card-border)'; this.style.backgroundColor='rgba(255,255,255,0.03)'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="modal-title" style="color: var(--warning); border-bottom-color: rgba(217, 119, 43, 0.15);">WIPE DEVELOPED SPOOL?</div>
+      
+      <div style="font-family: var(--font-sans); font-size: 13px; color: var(--text); line-height: 1.6; text-align: left;">
+        This will start a new roll of film.
+        <br><br>
+        <strong>Note:</strong> Your original files will remain completely safe on your camera SD card/storage.
+      </div>
+      
+      <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
+        <button class="btn-tactile-lg secondary" id="btn-confirm-reset-cancel" style="flex: 1;">KEEP PHOTOS</button>
+        <button class="btn-tactile-lg" id="btn-confirm-reset-proceed" style="flex: 1; background: linear-gradient(135deg, #d32f2f, #b71c1c); box-shadow: 0 4px 15px rgba(211, 47, 47, 0.35);">WIPE SPOOL</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- Global Toast Notifications -->
   <div class="toast-container" id="toast-container"></div>
   
@@ -2689,13 +2713,14 @@
             let fetchLogLine = await writeLog(`PRE-DOWNLOADING: 0/${downloadQueue.length} COMPLETED`, 100);
             let downloadedCount = 0;
             
-            // Map queue to fetch promises
-            const promises = downloadQueue.map(async (idx) => {
+            // Run all downloads sequentially to prevent network socket congestion & SDMMC bus contention
+            for (let i = 0; i < downloadQueue.length; i++) {
+              const idx = downloadQueue[i];
               const item = imagesList[idx];
               const fileURL = `${getCameraBaseURL()}/api/images/${item.filename}`;
               
-              // Run fetch with 8 second timeout and 3 retries
-              const res = await fetchWithTimeout(fileURL, {}, 8000, 3);
+              // Run fetch with 15 second timeout and 3 retries for stability
+              const res = await fetchWithTimeout(fileURL, {}, 15000, 3);
               const blob = await res.blob();
               
               // Cache the blob directly on the item
@@ -2703,10 +2728,7 @@
               
               downloadedCount++;
               fetchLogLine.textContent = `> PRE-DOWNLOADING: ${downloadedCount}/${downloadQueue.length} COMPLETED`;
-            });
-            
-            // Run all downloads in parallel
-            await Promise.all(promises);
+            }
             await writeLog("ALL NEGATIVE STRIPS CACHED LOCALLY", 100);
           }
         }
@@ -3385,18 +3407,21 @@
               let downloaded = 0;
               showLoading(`PRE-DOWNLOADING IMAGES: 0/${downloadQueue.length} COMPLETED`, 0);
               
-              const promises = downloadQueue.map(async (idx) => {
+              // Run all downloads sequentially to prevent network socket congestion & SDMMC bus contention
+              for (let i = 0; i < downloadQueue.length; i++) {
+                const idx = downloadQueue[i];
                 const item = imagesList[idx];
                 const fileURL = `${getCameraBaseURL()}/api/images/${item.filename}`;
-                const res = await fetchWithTimeout(fileURL, {}, 10000, 3);
+                
+                // Run fetch with 15 second timeout and 3 retries for stability
+                const res = await fetchWithTimeout(fileURL, {}, 15000, 3);
                 const blob = await res.blob();
                 item.blob = blob;
                 
                 downloaded++;
                 const percentage = Math.round((downloaded / downloadQueue.length) * 100);
                 showLoading(`PRE-DOWNLOADING IMAGES: ${downloaded}/${downloadQueue.length} COMPLETED`, percentage);
-              });
-              await Promise.all(promises);
+              }
             }
           } catch (err) {
             console.error("Failed to pre-fetch film frames:", err);
@@ -3535,11 +3560,21 @@
         switchView('style');
       });
       
-      // Reset spool (new roll from camera) with explicit warning
+      // Reset spool (new roll from camera) with custom modal warning
       document.getElementById('btn-reset-roll').addEventListener('click', () => {
-        const proceed = confirm("WIPE CURRENT DEVELOPED SPOOL?\n\nThis will clear the developed photos from your screen. They will remain safe on your camera card.");
-        if (!proceed) return;
-        
+        document.getElementById('confirm-reset-modal').classList.add('active');
+      });
+      
+      document.getElementById('btn-confirm-reset-cancel').addEventListener('click', () => {
+        document.getElementById('confirm-reset-modal').classList.remove('active');
+      });
+      
+      document.getElementById('btn-confirm-reset-cancel-cross').addEventListener('click', () => {
+        document.getElementById('confirm-reset-modal').classList.remove('active');
+      });
+      
+      document.getElementById('btn-confirm-reset-proceed').addEventListener('click', () => {
+        document.getElementById('confirm-reset-modal').classList.remove('active');
         developedImages.forEach(img => {
           if (img.url) URL.revokeObjectURL(img.url);
         });

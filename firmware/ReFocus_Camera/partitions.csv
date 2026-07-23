@@ -1,0 +1,6 @@
+# ReFocus Camera — Custom Partition Table
+# 16 MB flash, partition table at 0xC000
+# Name,   Type, SubType,  Offset,   Size,  Flags
+nvs,      data, nvs,      0xD000,   24K,
+phy_init, data, phy,      0x13000,  4K,
+factory,  app,  factory,  0x20000,  3M,

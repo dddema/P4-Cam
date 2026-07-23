@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/CMakeFiles/bootloader
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/CMakeFiles/bootloader.rule
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/CMakeFiles/bootloader-complete.rule
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

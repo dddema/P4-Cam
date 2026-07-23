@@ -1,0 +1,8 @@
+Command: ninja all
+[1/4] cd /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build && /Users/ddemarco/.espressif/tools/python/v6.0.2/venv/bin/python /Users/ddemarco/.espressif/v6.0.2/esp-idf/components/partition_table/check_sizes.py --offset 0xc000 partition --type app /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/partition_table/partition-table.bin /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/ReFocus_Camera.bin
+ReFocus_Camera.bin binary size 0xfae00 bytes. Smallest app partition is 0x300000 bytes. 0x205200 bytes (67%) free.
+[2/4] Performing build step for 'bootloader'
+[1/1] cd /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader && /Users/ddemarco/.espressif/tools/python/v6.0.2/venv/bin/python /Users/ddemarco/.espressif/v6.0.2/esp-idf/components/partition_table/check_sizes.py --offset 0xc000 bootloader 0x2000 /Users/ddemarco/work/Projects/rasp_camera/firmware/ReFocus_Camera/build/bootloader/bootloader.bin
+Bootloader binary size 0x5e10 bytes. 0x41f0 bytes (41%) free.
+[3/4] No install step for 'bootloader'
+[4/4] Completed 'bootloader'
