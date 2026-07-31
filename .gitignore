@@ -1,3 +1,25 @@
+# macOS system files
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon
 ._*
-firmware/.pio/
+.Spotlight-V100
+.Trashes
+
+# OS and IDE files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.orig
+
+# ESP-IDF firmware build and managed files
+**/build/
+**/managed_components/
+**/.cache/
+**/sdkconfig.old
+**/sdkconfig.backup

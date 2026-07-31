@@ -26,3 +26,7 @@ dependencies:
   espressif/esp_tinyusb:
     version: ">=0.15.0"
 
+  # cJSON library for parsing JSON bodies
+  espressif/cjson:
+    version: "*"
+

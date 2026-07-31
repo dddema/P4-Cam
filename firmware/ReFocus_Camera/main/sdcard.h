@@ -36,3 +36,26 @@ esp_err_t sdcard_next_image_path(char *out_path, int *out_index);
  * @return ESP_OK on success.
  */
 esp_err_t sdcard_write_jpeg(const char *path, const uint8_t *data, size_t len);
+
+/**
+ * @brief  Get the next auto-incrementing index for a default spool folder.
+ * @return Next spool index.
+ */
+int sdcard_get_next_spool_index(void);
+
+/**
+ * @brief  Move all img_*.jpg files from the root of the SD card into a new
+ *         subdirectory in "/sdcard/developed/<name>/" to mark them as developed.
+ * @param  requested_name  Custom folder name (if NULL or empty, defaults to "spool_N").
+ * @return ESP_OK on success.
+ */
+esp_err_t sdcard_wipe_spool(const char *requested_name);
+
+/**
+ * @brief  Delete an archived spool directory and all its files from "/sdcard/developed/<name>/".
+ * @param  spool_name  Name of the spool folder to delete.
+ * @return ESP_OK on success.
+ */
+esp_err_t sdcard_delete_spool(const char *spool_name);
+
+

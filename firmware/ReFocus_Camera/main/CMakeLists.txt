@@ -23,4 +23,5 @@ idf_component_register(
         log
         esp_hw_support
         tinyusb
+        cjson
 )

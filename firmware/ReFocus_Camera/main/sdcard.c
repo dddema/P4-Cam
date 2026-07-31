@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <unistd.h>
 
 #include "esp_log.h"
 #include "esp_vfs_fat.h"
@@ -352,3 +353,154 @@ esp_err_t sdcard_write_jpeg(const char *path, const uint8_t *data, size_t len)
     ESP_LOGI(TAG, "Saved %s (%zu bytes)", path, len);
     return ESP_OK;
 }
+
+int sdcard_get_next_spool_index(void)
+{
+    struct stat st;
+    if (stat("/sdcard/developed", &st) != 0) {
+        return 1;
+    }
+    DIR *dev_dir = opendir("/sdcard/developed");
+    if (!dev_dir) {
+        return 1;
+    }
+    int max_spool_idx = 0;
+    struct dirent *ent;
+    while ((ent = readdir(dev_dir)) != NULL) {
+        int idx = 0;
+        if (sscanf(ent->d_name, "spool_%d", &idx) == 1) {
+            if (idx > max_spool_idx) max_spool_idx = idx;
+        }
+    }
+    closedir(dev_dir);
+    return max_spool_idx + 1;
+}
+
+esp_err_t sdcard_wipe_spool(const char *requested_name)
+{
+    /* 1. Create SDCARD_IMG_DIR "/developed" if it doesn't exist */
+    struct stat st;
+    if (stat("/sdcard/developed", &st) != 0) {
+        if (mkdir("/sdcard/developed", 0777) != 0) {
+            ESP_LOGE(TAG, "Failed to create /sdcard/developed directory");
+            return ESP_FAIL;
+        }
+    }
+
+    /* 2. Determine target folder name, applying auto-incrementing suffix to avoid collisions */
+    char folder_name[128] = {0};
+    if (requested_name && requested_name[0] != '\0') {
+        const char *p = requested_name;
+        if (strncasecmp(p, "spool_", 6) == 0) {
+            p += 6;
+        }
+        snprintf(folder_name, sizeof(folder_name), "spool_%s", p);
+        
+        /* Lowercase and sanitize spaces/special characters */
+        for (int i = 0; folder_name[i] != '\0'; i++) {
+            char c = folder_name[i];
+            if (c >= 'A' && c <= 'Z') {
+                folder_name[i] = c + 32;
+            } else if (c == ' ' || c == '-' || c == '/' || c == '\\') {
+                folder_name[i] = '_';
+            }
+        }
+    } else {
+        int next_spool = sdcard_get_next_spool_index();
+        snprintf(folder_name, sizeof(folder_name), "spool_%d", next_spool);
+    }
+
+    char spool_path[256];
+    snprintf(spool_path, sizeof(spool_path), "/sdcard/developed/%s", folder_name);
+
+    /* If folder already exists, find a non-colliding name by appending "_N" */
+    int suffix = 1;
+    while (stat(spool_path, &st) == 0) {
+        if (requested_name && requested_name[0] != '\0') {
+            snprintf(folder_name, sizeof(folder_name), "%s_%d", requested_name, suffix);
+        } else {
+            int next_spool = sdcard_get_next_spool_index();
+            snprintf(folder_name, sizeof(folder_name), "spool_%d_%d", next_spool, suffix);
+        }
+        snprintf(spool_path, sizeof(spool_path), "/sdcard/developed/%s", folder_name);
+        suffix++;
+    }
+
+    /* 3. Create the spool folder */
+    if (mkdir(spool_path, 0777) != 0) {
+        ESP_LOGE(TAG, "Failed to create directory %s", spool_path);
+        return ESP_FAIL;
+    }
+    ESP_LOGI(TAG, "Created spool archive directory: %s", spool_path);
+
+    /* 4. Scan the root directory /sdcard and move all img_*.jpg files into the new folder */
+    DIR *root_dir = opendir(SDCARD_IMG_DIR);
+    if (!root_dir) {
+        ESP_LOGE(TAG, "Cannot open image root directory");
+        return ESP_FAIL;
+    }
+
+    int moved_count = 0;
+    struct dirent *ent;
+    while ((ent = readdir(root_dir)) != NULL) {
+        if (ent->d_type != DT_REG) continue;
+        int img_idx = 0;
+        if (sscanf(ent->d_name, IMG_FILE_PREFIX "%d" IMG_FILE_EXT, &img_idx) == 1) {
+            char old_path[512];
+            char new_path[512];
+            snprintf(old_path, sizeof(old_path), "%s/%s", SDCARD_IMG_DIR, ent->d_name);
+            snprintf(new_path, sizeof(new_path), "%s/%s", spool_path, ent->d_name);
+            if (rename(old_path, new_path) == 0) {
+                moved_count++;
+            } else {
+                ESP_LOGE(TAG, "Failed to move %s to %s", old_path, new_path);
+            }
+        }
+    }
+    closedir(root_dir);
+
+    ESP_LOGI(TAG, "Spool wiped successfully! Moved %d images to %s", moved_count, spool_path);
+    return ESP_OK;
+}
+
+esp_err_t sdcard_delete_spool(const char *spool_name)
+{
+    if (!spool_name || spool_name[0] == '\0') {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    char spool_path[256];
+    snprintf(spool_path, sizeof(spool_path), "/sdcard/developed/%s", spool_name);
+    
+    // Safety check: prevent directory traversal
+    if (strstr(spool_name, "..") != NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    DIR *dir = opendir(spool_path);
+    if (!dir) {
+        ESP_LOGE(TAG, "Cannot open directory for deletion: %s", spool_path);
+        return ESP_ERR_NOT_FOUND;
+    }
+    
+    struct dirent *ent;
+    while ((ent = readdir(dir)) != NULL) {
+        if (ent->d_type == DT_REG) {
+            char filepath[512];
+            snprintf(filepath, sizeof(filepath), "%s/%s", spool_path, ent->d_name);
+            if (unlink(filepath) != 0) {
+                ESP_LOGE(TAG, "Failed to delete file: %s", filepath);
+            }
+        }
+    }
+    closedir(dir);
+    
+    if (rmdir(spool_path) != 0) {
+        ESP_LOGE(TAG, "Failed to remove directory: %s", spool_path);
+        return ESP_FAIL;
+    }
+    
+    ESP_LOGI(TAG, "Deleted spool directory successfully: %s", spool_path);
+    return ESP_OK;
+}
+

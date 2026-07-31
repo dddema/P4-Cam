@@ -26,6 +26,7 @@
 #include "config.h"
 #include "sdcard.h"
 #include "webserver.h"
+#include "cJSON.h"
 
 static const char *TAG = "webserver";
 
@@ -35,7 +36,7 @@ static httpd_handle_t s_server = NULL;
 static void add_cors(httpd_req_t *req)
 {
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin",  "*");
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "GET, OPTIONS");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "*");
 }
 
@@ -208,11 +209,24 @@ static esp_err_t list_images_handler(httpd_req_t *req)
     add_cors(req);
     httpd_resp_set_type(req, "application/json");
 
-    DIR *dir = opendir(SDCARD_IMG_DIR);
+    char dir_path[256];
+    snprintf(dir_path, sizeof(dir_path), "%s", SDCARD_IMG_DIR);
+
+    char query[128];
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK) {
+        char spool_val[64];
+        if (httpd_query_key_value(query, "spool", spool_val, sizeof(spool_val)) == ESP_OK) {
+            if (!strchr(spool_val, '/') && !strstr(spool_val, "..")) {
+                snprintf(dir_path, sizeof(dir_path), "/sdcard/developed/%s", spool_val);
+            }
+        }
+    }
+
+    DIR *dir = opendir(dir_path);
     if (!dir) {
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
-                            "Cannot open image directory");
-        return ESP_FAIL;
+        httpd_resp_send_chunk(req, "[", 1);
+        httpd_resp_send_chunk(req, "]", 1);
+        return httpd_resp_send_chunk(req, NULL, 0);
     }
 
     /* Chunked transfer — send opening bracket */
@@ -221,22 +235,28 @@ static esp_err_t list_images_handler(httpd_req_t *req)
     bool first = true;
     struct dirent *ent;
     char   chunk[256];
-    char   path[300];  /* 300 bytes: enough for mount point + max filename */
+    char   path[512];
 
     while ((ent = readdir(dir)) != NULL) {
-        ESP_LOGI(TAG, "Discovered SD entry: '%s', type: %d", ent->d_name, (int)ent->d_type);
+        ESP_LOGI(TAG, "Discovered entry: '%s' in path '%s'", ent->d_name, dir_path);
 
-        if (ent->d_type != DT_REG) continue;
+        if (ent->d_type != DT_REG) {
+            /* Fallback check in case d_type is not populated by the filesystem */
+            char check_path[512];
+            snprintf(check_path, sizeof(check_path), "%s/%s", dir_path, ent->d_name);
+            struct stat st;
+            if (stat(check_path, &st) != 0 || !S_ISREG(st.st_mode)) {
+                continue;
+            }
+        }
 
         /* Only list files ending in .jpg or .jpeg (case-insensitive) */
         const char *dot = strrchr(ent->d_name, '.');
         if (!dot || (strcasecmp(dot, ".jpg") != 0 && strcasecmp(dot, ".jpeg") != 0))
             continue;
 
-
-
         /* Get file size */
-        snprintf(path, sizeof(path), "%s/%s", SDCARD_IMG_DIR, ent->d_name);
+        snprintf(path, sizeof(path), "%s/%s", dir_path, ent->d_name);
         struct stat st;
         long fsize = (stat(path, &st) == 0) ? (long)st.st_size : 0;
 
@@ -306,14 +326,30 @@ static esp_err_t get_image_handler(httpd_req_t *req)
     char filename[128];
     url_decode(filename, raw_filename, sizeof(filename));
 
+    /* Truncate query string from filename if present */
+    char *query_start = strchr(filename, '?');
+    if (query_start) {
+        *query_start = '\0';
+    }
+
     /* Sanitise: must not contain '/' or '..' */
     if (strchr(filename, '/') || strstr(filename, "..")) {
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid filename");
         return ESP_FAIL;
     }
 
-    char path[256];
-    snprintf(path, sizeof(path), "%s/%s", SDCARD_IMG_DIR, filename);
+    char path[512];
+    char spool_val[64] = {0};
+    char query[128];
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK) {
+        httpd_query_key_value(query, "spool", spool_val, sizeof(spool_val));
+    }
+
+    if (spool_val[0] != '\0' && !strchr(spool_val, '/') && !strstr(spool_val, "..")) {
+        snprintf(path, sizeof(path), "/sdcard/developed/%s/%s", spool_val, filename);
+    } else {
+        snprintf(path, sizeof(path), "%s/%s", SDCARD_IMG_DIR, filename);
+    }
 
     ESP_LOGI(TAG, "Image requested (raw): %s -> (decoded): %s", raw_filename, filename);
 
@@ -364,6 +400,121 @@ static esp_err_t get_image_handler(httpd_req_t *req)
     return ret;
 }
 
+/* ─── GET /api/spools ──────────────────────────────────────────────── */
+static esp_err_t list_spools_handler(httpd_req_t *req)
+{
+    add_cors(req);
+    httpd_resp_set_type(req, "application/json");
+
+    DIR *dir = opendir("/sdcard/developed");
+    if (!dir) {
+        return httpd_resp_send(req, "[]", 2);
+    }
+
+    httpd_resp_send_chunk(req, "[", 1);
+    bool first = true;
+    struct dirent *ent;
+    char chunk[256];
+
+    while ((ent = readdir(dir)) != NULL) {
+        if (strncmp(ent->d_name, "spool_", 6) == 0) {
+            char path[300];
+            snprintf(path, sizeof(path), "/sdcard/developed/%s", ent->d_name);
+            struct stat st;
+            if (stat(path, &st) == 0 && S_ISDIR(st.st_mode)) {
+                int clen = snprintf(chunk, sizeof(chunk),
+                                    "%s\"%s\"",
+                                    first ? "" : ",", ent->d_name);
+                httpd_resp_send_chunk(req, chunk, clen);
+                first = false;
+            }
+        }
+    }
+    closedir(dir);
+
+    httpd_resp_send_chunk(req, "]", 1);
+    return httpd_resp_send_chunk(req, NULL, 0);
+}
+
+/* ─── GET /api/spool/next ──────────────────────────────────────────── */
+static esp_err_t get_next_spool_handler(httpd_req_t *req)
+{
+    add_cors(req);
+    int next_spool_idx = sdcard_get_next_spool_index();
+    char buf[64];
+    int len = snprintf(buf, sizeof(buf), "{\"next_spool\":\"spool_%d\"}", next_spool_idx);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, buf, len);
+}
+
+/* ─── POST /api/spool/wipe ─────────────────────────────────────────── */
+static esp_err_t wipe_spool_handler(httpd_req_t *req)
+{
+    add_cors(req);
+
+    char content[128] = {0};
+    int ret_len = httpd_req_recv(req, content, sizeof(content) - 1);
+    char requested_name[64] = {0};
+
+    if (ret_len > 0) {
+        content[ret_len] = '\0';
+        cJSON *root = cJSON_Parse(content);
+        if (root) {
+            cJSON *name_item = cJSON_GetObjectItem(root, "name");
+            if (name_item && cJSON_IsString(name_item)) {
+                snprintf(requested_name, sizeof(requested_name), "%s", name_item->valuestring);
+            }
+            cJSON_Delete(root);
+        }
+    }
+
+    esp_err_t ret = sdcard_wipe_spool(requested_name[0] ? requested_name : NULL);
+    if (ret == ESP_OK) {
+        httpd_resp_set_type(req, "application/json");
+        return httpd_resp_send(req, "{\"status\":\"ok\"}", 15);
+    } else {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Wipe failed");
+        return ESP_FAIL;
+    }
+}
+
+/* ─── POST /api/spool/delete ───────────────────────────────────────── */
+static esp_err_t delete_spool_handler(httpd_req_t *req)
+{
+    add_cors(req);
+
+    char content[128] = {0};
+    int ret_len = httpd_req_recv(req, content, sizeof(content) - 1);
+    char requested_name[64] = {0};
+
+    if (ret_len > 0) {
+        content[ret_len] = '\0';
+        cJSON *root = cJSON_Parse(content);
+        if (root) {
+            cJSON *name_item = cJSON_GetObjectItem(root, "name");
+            if (name_item && cJSON_IsString(name_item)) {
+                snprintf(requested_name, sizeof(requested_name), "%s", name_item->valuestring);
+            }
+            cJSON_Delete(root);
+        }
+    }
+
+    if (!requested_name[0]) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Missing spool name");
+        return ESP_FAIL;
+    }
+
+    esp_err_t ret = sdcard_delete_spool(requested_name);
+    if (ret == ESP_OK) {
+        httpd_resp_set_type(req, "application/json");
+        return httpd_resp_send(req, "{\"status\":\"ok\"}", 15);
+    } else {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Delete failed");
+        return ESP_FAIL;
+    }
+}
+
+
 /* ─── server lifecycle ──────────────────────────────────────────────── */
 esp_err_t webserver_start(void)
 {
@@ -374,7 +525,7 @@ esp_err_t webserver_start(void)
 
     httpd_config_t cfg   = HTTPD_DEFAULT_CONFIG();
     cfg.stack_size       = 8192;
-    cfg.max_uri_handlers = 8;
+    cfg.max_uri_handlers = 12;
     cfg.uri_match_fn     = httpd_uri_match_wildcard;
 
     ESP_ERROR_CHECK(httpd_start(&s_server, &cfg));
@@ -435,6 +586,37 @@ esp_err_t webserver_start(void)
     };
     httpd_register_uri_handler(s_server, &images_file_uri);
 
+    /* GET /api/spools — retrieve the list of developed spool folder names */
+    static const httpd_uri_t list_spools_uri = {
+        .uri     = "/api/spools",
+        .method  = HTTP_GET,
+        .handler = list_spools_handler,
+    };
+    httpd_register_uri_handler(s_server, &list_spools_uri);
+
+    /* GET /api/spool/next — retrieve the next default spool folder name */
+    static const httpd_uri_t get_next_spool_uri = {
+        .uri     = "/api/spool/next",
+        .method  = HTTP_GET,
+        .handler = get_next_spool_handler,
+    };
+    httpd_register_uri_handler(s_server, &get_next_spool_uri);
+
+    /* POST /api/spool/wipe — wipe the active spool and archive files */
+    static const httpd_uri_t wipe_spool_uri = {
+        .uri     = "/api/spool/wipe",
+        .method  = HTTP_POST,
+        .handler = wipe_spool_handler,
+    };
+    httpd_register_uri_handler(s_server, &wipe_spool_uri);
+
+    /* POST /api/spool/delete — delete an archived spool folder and its contents */
+    static const httpd_uri_t delete_spool_uri = {
+        .uri     = "/api/spool/delete",
+        .method  = HTTP_POST,
+        .handler = delete_spool_handler,
+    };
+    httpd_register_uri_handler(s_server, &delete_spool_uri);
 
     ESP_LOGI(TAG, "HTTP server started on port 80");
     return ESP_OK;

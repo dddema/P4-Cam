@@ -1055,6 +1055,7 @@
               <button class="btn-tactile-lg secondary" id="btn-reconnect" style="flex: 1; margin: 0;">RE-ESTABLISH LINK</button>
               <button class="btn-tactile-lg secondary" id="btn-usb-import" style="flex: 1; margin: 0;">IMPORT FROM USB-C</button>
             </div>
+            <button class="btn-tactile-lg secondary" id="btn-view-spools" style="width: 100%; margin: 0;">VIEW ARCHIVED SPOOLS</button>
           </div>
         </div>
         
@@ -1405,6 +1406,15 @@
         <br><br>
         <strong>Note:</strong> Your original files will remain completely safe on your camera SD card/storage.
       </div>
+
+      <!-- Custom Spool Name Input -->
+      <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left;">
+        <label style="font-family: var(--font-sans); font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Spool Name / Archive Folder</label>
+        <div id="spool-input-wrapper" style="display: flex; align-items: center; width: 100%; padding: 12px 14px; font-family: var(--font-sans); font-size: 14px; border-radius: 10px; border: 1.5px solid var(--border); background: rgba(255,255,255,0.7); cursor: text; transition: all 0.2s ease-in-out; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);" onclick="document.getElementById('input-spool-name').focus()">
+          <span style="color: var(--text-muted); font-weight: 600; user-select: none; margin-right: 2px;">spool_</span>
+          <input type="text" id="input-spool-name" placeholder="..." style="flex: 1; border: none; background: transparent; padding: 0; outline: none; font-family: var(--font-sans); font-size: 14px; color: var(--text); font-weight: 600;">
+        </div>
+      </div>
       
       <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
         <button class="btn-tactile-lg secondary" id="btn-confirm-reset-cancel" style="flex: 1;">KEEP PHOTOS</button>
@@ -1413,6 +1423,56 @@
     </div>
   </div>
   
+  <!-- Delete Spool Confirmation Modal -->
+  <div class="modal-overlay" id="confirm-delete-spool-modal">
+    <div class="modal-content" style="max-width: 400px; padding: 25px; gap: 15px; position: relative;">
+      <button id="btn-confirm-delete-cancel-cross" style="position: absolute; top: 22px; right: 25px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--card-border); background: rgba(255,255,255,0.03); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease-in-out;" title="Cancel" onmouseover="this.style.color='var(--accent)'; this.style.borderColor='var(--accent)'; this.style.backgroundColor='var(--accent-glow-ultralight)'" onmouseout="this.style.color='var(--text-muted)'; this.style.borderColor='var(--card-border)'; this.style.backgroundColor='rgba(255,255,255,0.03)'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="modal-title" style="color: #d32f2f; border-bottom-color: rgba(211, 47, 47, 0.15);">DELETE FILM SPOOL?</div>
+      
+      <div style="font-family: var(--font-sans); font-size: 13px; color: var(--text); line-height: 1.6; text-align: left;">
+        This will permanently delete the archived spool <strong id="delete-spool-name-label" style="color: var(--accent);">spool_name</strong> and all of its developed photos from the camera storage.
+        <br><br>
+        <strong style="color: #d32f2f;">Warning:</strong> This action is irreversible.
+      </div>
+      
+      <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
+        <button class="btn-tactile-lg secondary" id="btn-confirm-delete-cancel" style="flex: 1;">KEEP SPOOL</button>
+        <button class="btn-tactile-lg" id="btn-confirm-delete-proceed" style="flex: 1; background: linear-gradient(135deg, #d32f2f, #b71c1c); box-shadow: 0 4px 15px rgba(211, 47, 47, 0.35);">DELETE PERMANENTLY</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Archived Spools Modal -->
+  <div class="modal-overlay" id="spools-modal">
+    <div class="modal-content" style="max-width: 420px; padding: 25px; gap: 18px; position: relative; max-height: 85vh;">
+      <button id="btn-spools-close-cross" style="position: absolute; top: 22px; right: 25px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--card-border); background: rgba(255,255,255,0.03); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease-in-out;" title="Close" onmouseover="this.style.color='var(--accent)'; this.style.borderColor='var(--accent)'; this.style.backgroundColor='var(--accent-glow-ultralight)'" onmouseout="this.style.color='var(--text-muted)'; this.style.borderColor='var(--card-border)'; this.style.backgroundColor='rgba(255,255,255,0.03)'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="modal-title" style="border-bottom-color: rgba(217, 119, 43, 0.15);">ARCHIVED FILM SPOOLS</div>
+      
+      <div style="font-family: var(--font-sans); font-size: 13px; color: var(--text-muted); text-align: left; line-height: 1.5;">
+        Select an archived spool below to load and redevelop its photos.
+      </div>
+      
+      <!-- Spools List Container -->
+      <div id="spools-list-container" style="width: 100%; display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 4px;">
+        <div style="font-family: var(--font-sans); font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px 0;">Loading spools...</div>
+      </div>
+      
+      <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
+        <button class="btn-tactile-lg secondary" id="btn-spools-close" style="width: 100%;">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Global Toast Notifications -->
   <div class="toast-container" id="toast-container"></div>
   
@@ -2222,6 +2282,7 @@
     let activeMode = 'demo';
     let pollingInterval = null;
     let connectionEpoch = 0;
+    let activeSpool = null; // null means active roll, otherwise spool name (e.g. spool_monaco)
     
     let imagesList = [];
     let mockImagesList = [
@@ -2239,6 +2300,8 @@
     ];
     
     let developedImages = []; // Stores { filename, url, blob }
+    let mockSpools = ['spool_1', 'spool_monaco', 'spool_vacation_italy'];
+    let spoolToDelete = null;
     let selectedLUT = 'identity';
     let vintageEffectsEnabled = true;
     let blackMistEnabled = true;
@@ -2455,13 +2518,15 @@
       
       setConnectionState('connecting');
       cartridgeSummary.textContent = 'LINKING TO CAMERA CARTRIDGE...';
-      cartridgeDetails.textContent = `Attempting ping at ${getCameraBaseURL()}/api/images...`;
+      const pingURL = activeSpool
+        ? `${getCameraBaseURL()}/api/images?spool=${activeSpool}`
+        : `${getCameraBaseURL()}/api/images`;
+      cartridgeDetails.textContent = `Attempting ping at ${pingURL}...`;
       btnStartDevelop.disabled = true;
       btnReconnect.style.display = 'none';
       wifiInstructions.style.display = 'none';
       
       try {
-        const pingURL = `${getCameraBaseURL()}/api/images`;
         const res = await fetchWithTimeout(pingURL, { method: 'GET' }, 5000, 3, epoch);
         if (res.ok) {
           if (epoch !== connectionEpoch) return;
@@ -2472,8 +2537,13 @@
           clearPresetPreviewURLs();
           resetLutCardPreviews();
           
-          cartridgeSummary.textContent = 'CARTRIDGE LINK ESTABLISHED';
-          cartridgeDetails.textContent = `${imagesList.length} RAW EXPOSURES DETECTED IN CAMERA STORAGE`;
+          if (activeSpool) {
+            cartridgeSummary.textContent = `ARCHIVED SPOOL: ${activeSpool.toUpperCase()}`;
+            cartridgeDetails.textContent = `${imagesList.length} EXPOSURES READY IN '${activeSpool}'`;
+          } else {
+            cartridgeSummary.textContent = 'CARTRIDGE LINK ESTABLISHED';
+            cartridgeDetails.textContent = `${imagesList.length} RAW EXPOSURES DETECTED IN CAMERA STORAGE`;
+          }
           btnStartDevelop.disabled = imagesList.length === 0;
           btnReconnect.style.display = 'none';
           wifiInstructions.style.display = 'none';
@@ -2502,7 +2572,7 @@
     function startConnectionPolling() {
       if (pollingInterval) clearInterval(pollingInterval);
       pollingInterval = setInterval(async () => {
-        if (activeView !== 'start' || forceDemoMode || activeMode === 'live' || activeMode === 'local') {
+        if (activeView !== 'start' || forceDemoMode || activeMode === 'live' || activeMode === 'local' || activeSpool) {
           clearInterval(pollingInterval);
           pollingInterval = null;
           return;
@@ -2717,7 +2787,9 @@
             for (let i = 0; i < downloadQueue.length; i++) {
               const idx = downloadQueue[i];
               const item = imagesList[idx];
-              const fileURL = `${getCameraBaseURL()}/api/images/${item.filename}`;
+              const fileURL = activeSpool
+                ? `${getCameraBaseURL()}/api/images/${item.filename}?spool=${activeSpool}`
+                : `${getCameraBaseURL()}/api/images/${item.filename}`;
               
               // Run fetch with 15 second timeout and 3 retries for stability
               const res = await fetchWithTimeout(fileURL, {}, 15000, 3);
@@ -3411,7 +3483,9 @@
               for (let i = 0; i < downloadQueue.length; i++) {
                 const idx = downloadQueue[i];
                 const item = imagesList[idx];
-                const fileURL = `${getCameraBaseURL()}/api/images/${item.filename}`;
+                const fileURL = activeSpool
+                  ? `${getCameraBaseURL()}/api/images/${item.filename}?spool=${activeSpool}`
+                  : `${getCameraBaseURL()}/api/images/${item.filename}`;
                 
                 // Run fetch with 15 second timeout and 3 retries for stability
                 const res = await fetchWithTimeout(fileURL, {}, 15000, 3);
@@ -3561,8 +3635,50 @@
       });
       
       // Reset spool (new roll from camera) with custom modal warning
-      document.getElementById('btn-reset-roll').addEventListener('click', () => {
+      const spoolInput = document.getElementById('input-spool-name');
+      const spoolWrapper = document.getElementById('spool-input-wrapper');
+      
+      spoolInput.addEventListener('focus', () => {
+        spoolWrapper.style.borderColor = 'var(--accent)';
+        spoolWrapper.style.backgroundColor = '#fff';
+        spoolWrapper.style.boxShadow = '0 0 0 3px rgba(217, 119, 43, 0.15), inset 0 1px 3px rgba(0,0,0,0.05)';
+      });
+      
+      spoolInput.addEventListener('blur', () => {
+        spoolWrapper.style.borderColor = 'var(--border)';
+        spoolWrapper.style.backgroundColor = 'rgba(255,255,255,0.7)';
+        spoolWrapper.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.05)';
+      });
+
+      document.getElementById('btn-reset-roll').addEventListener('click', async () => {
+        spoolInput.value = '';
+        spoolInput.placeholder = '...';
         document.getElementById('confirm-reset-modal').classList.add('active');
+
+        if (!forceDemoMode) {
+          try {
+            const nextURL = `${getCameraBaseURL()}/api/spool/next`;
+            const res = await fetchWithTimeout(nextURL, { method: 'GET' }, 3000, 2);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.next_spool) {
+                let displayVal = data.next_spool;
+                if (displayVal.startsWith('spool_')) {
+                  displayVal = displayVal.slice(6);
+                }
+                spoolInput.placeholder = displayVal;
+                spoolInput.value = displayVal;
+              }
+            }
+          } catch (err) {
+            console.warn('Failed to fetch next spool name:', err);
+            spoolInput.placeholder = 'N';
+            spoolInput.value = 'N';
+          }
+        } else {
+          spoolInput.placeholder = 'demo';
+          spoolInput.value = 'demo';
+        }
       });
       
       document.getElementById('btn-confirm-reset-cancel').addEventListener('click', () => {
@@ -3573,8 +3689,34 @@
         document.getElementById('confirm-reset-modal').classList.remove('active');
       });
       
-      document.getElementById('btn-confirm-reset-proceed').addEventListener('click', () => {
+      document.getElementById('btn-confirm-reset-proceed').addEventListener('click', async () => {
         document.getElementById('confirm-reset-modal').classList.remove('active');
+        
+        const inputField = document.getElementById('input-spool-name');
+        const customName = inputField.value.trim() || inputField.placeholder;
+
+        if (!forceDemoMode) {
+          showLoading('WIPING CAMERA SPOOL...');
+          try {
+            const wipeURL = `${getCameraBaseURL()}/api/spool/wipe`;
+            await fetchWithTimeout(wipeURL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: customName })
+            }, 5000, 3);
+            showToast(`Spool '${customName}' wiped successfully!`, 'success');
+          } catch (err) {
+            console.error('Failed to wipe camera spool:', err);
+            showToast('Failed to wipe camera spool: ' + err.message, 'error');
+          } finally {
+            hideLoading();
+          }
+        } else {
+          mockImagesList = [];
+          showToast('Demo spool reset!', 'success');
+        }
+
+        activeSpool = null;
         developedImages.forEach(img => {
           if (img.url) URL.revokeObjectURL(img.url);
         });
@@ -3582,6 +3724,245 @@
         filmDeveloped = false;
         switchView('start');
         validateCameraConnection();
+      });
+
+      // Delete Spool Confirmation Modal Event Listeners
+      document.getElementById('btn-confirm-delete-cancel').addEventListener('click', () => {
+        document.getElementById('confirm-delete-spool-modal').classList.remove('active');
+        document.getElementById('spools-modal').classList.add('active');
+      });
+
+      document.getElementById('btn-confirm-delete-cancel-cross').addEventListener('click', () => {
+        document.getElementById('confirm-delete-spool-modal').classList.remove('active');
+        document.getElementById('spools-modal').classList.add('active');
+      });
+
+      document.getElementById('btn-confirm-delete-proceed').addEventListener('click', async () => {
+        document.getElementById('confirm-delete-spool-modal').classList.remove('active');
+        if (!spoolToDelete) return;
+        
+        const spool = spoolToDelete;
+        spoolToDelete = null;
+
+        showLoading(`DELETING SPOOL '${spool.toUpperCase()}'...`);
+        try {
+          if (!forceDemoMode) {
+            const deleteURL = `${getCameraBaseURL()}/api/spool/delete`;
+            const response = await fetchWithTimeout(deleteURL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: spool })
+            }, 5000, 2);
+            
+            if (response.ok) {
+              showToast(`Spool '${spool}' deleted successfully!`, 'success');
+              // Refresh spools modal list by triggering click again
+              document.getElementById('btn-view-spools').click();
+            } else {
+              throw new Error('Failed to delete spool on camera');
+            }
+          } else {
+            // Mock mode deletion
+            const idx = mockSpools.indexOf(spool);
+            if (idx !== -1) {
+              mockSpools.splice(idx, 1);
+            }
+            showToast(`Spool '${spool}' deleted (Demo Mode)!`, 'success');
+            // Re-render modal by clicking the view spools button
+            document.getElementById('btn-view-spools').click();
+          }
+        } catch (err) {
+          console.error('Failed to delete spool:', err);
+          showToast('Failed to delete spool: ' + err.message, 'error');
+          // Re-show spools modal on error so user can retry or close
+          document.getElementById('spools-modal').classList.add('active');
+        } finally {
+          hideLoading();
+        }
+      });
+
+      // View Archived Spools Modal
+      document.getElementById('btn-view-spools').addEventListener('click', async () => {
+        const container = document.getElementById('spools-list-container');
+        container.innerHTML = '<div style="font-family: var(--font-sans); font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px 0;">Loading spools...</div>';
+        document.getElementById('spools-modal').classList.add('active');
+        
+        let spools = [];
+        if (!forceDemoMode) {
+          try {
+            const res = await fetchWithTimeout(`${getCameraBaseURL()}/api/spools`, {}, 5000, 2);
+            if (res.ok) {
+              spools = await res.json();
+            }
+          } catch (err) {
+            console.error("Failed to fetch spools:", err);
+            showToast("Failed to fetch archived spools", "error");
+          }
+        } else {
+          spools = [...mockSpools];
+        }
+        
+        container.innerHTML = '';
+        
+        // 1. Add option to load active camera roll
+        const activeRow = document.createElement('div');
+        activeRow.style.display = 'flex';
+        activeRow.style.alignItems = 'center';
+        activeRow.style.justifyContent = 'space-between';
+        activeRow.style.padding = '12px 16px';
+        activeRow.style.border = '1px solid var(--accent)';
+        activeRow.style.borderRadius = '10px';
+        activeRow.style.background = 'rgba(217, 119, 43, 0.05)';
+        
+        const activeLabel = document.createElement('span');
+        activeLabel.textContent = 'ACTIVE CAMERA ROLL';
+        activeLabel.style.fontFamily = 'var(--font-sans)';
+        activeLabel.style.fontSize = '13px';
+        activeLabel.style.fontWeight = '700';
+        activeLabel.style.color = 'var(--accent)';
+        
+        const activeBtn = document.createElement('button');
+        activeBtn.textContent = 'LOAD ACTIVE';
+        activeBtn.className = 'btn-tactile-lg secondary';
+        activeBtn.style.margin = '0';
+        activeBtn.style.padding = '6px 12px';
+        activeBtn.style.fontSize = '11px';
+        activeBtn.style.width = 'auto';
+        
+        const isConnected = (activeMode === 'live' || activeMode === 'local' || forceDemoMode);
+        
+        activeBtn.disabled = !isConnected;
+        if (!isConnected) {
+          activeBtn.style.opacity = '0.5';
+          activeBtn.style.cursor = 'not-allowed';
+        }
+        
+        activeBtn.addEventListener('click', () => {
+          activeSpool = null;
+          document.getElementById('spools-modal').classList.remove('active');
+          showToast('Loaded active camera roll', 'success');
+          validateCameraConnection();
+        });
+        
+        activeRow.appendChild(activeLabel);
+        activeRow.appendChild(activeBtn);
+        container.appendChild(activeRow);
+        
+        const spacer = document.createElement('div');
+        spacer.style.height = '1px';
+        spacer.style.background = 'rgba(217, 119, 43, 0.15)';
+        spacer.style.margin = '5px 0';
+        container.appendChild(spacer);
+        
+        // 2. Add archived spools list
+        if (spools.length === 0) {
+          const emptyMsg = document.createElement('div');
+          emptyMsg.textContent = 'No archived spools found.';
+          emptyMsg.style.fontFamily = 'var(--font-sans)';
+          emptyMsg.style.fontSize = '13px';
+          emptyMsg.style.color = 'var(--text-muted)';
+          emptyMsg.style.textAlign = 'center';
+          emptyMsg.style.padding = '20px 0';
+          container.appendChild(emptyMsg);
+          return;
+        }
+        
+        spools.forEach(spool => {
+          const row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.alignItems = 'center';
+          row.style.justifyContent = 'space-between';
+          row.style.padding = '12px 16px';
+          row.style.border = '1px solid var(--border)';
+          row.style.borderRadius = '10px';
+          row.style.background = 'rgba(255,255,255,0.03)';
+          row.style.marginTop = '8px';
+          
+          const label = document.createElement('span');
+          label.textContent = spool.toUpperCase();
+          label.style.fontFamily = 'var(--font-sans)';
+          label.style.fontSize = '13px';
+          label.style.fontWeight = '600';
+          label.style.color = 'var(--text)';
+          
+          // Action Buttons Group (Redevelop + Delete)
+          const actionsGroup = document.createElement('div');
+          actionsGroup.style.display = 'flex';
+          actionsGroup.style.alignItems = 'center';
+          actionsGroup.style.gap = '8px';
+          
+          // Redevelop Button
+          const btn = document.createElement('button');
+          btn.textContent = 'REDEVELOP';
+          btn.className = 'btn-tactile-lg';
+          btn.style.margin = '0';
+          btn.style.padding = '6px 12px';
+          btn.style.fontSize = '11px';
+          btn.style.width = 'auto';
+          btn.style.background = 'var(--accent)';
+          btn.disabled = !isConnected;
+          if (!isConnected) {
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+            btn.style.background = 'rgba(255,255,255,0.05)';
+            btn.style.color = 'var(--text-muted)';
+            btn.style.borderColor = 'rgba(255,255,255,0.05)';
+          }
+          
+          btn.addEventListener('click', () => {
+            activeSpool = spool;
+            document.getElementById('spools-modal').classList.remove('active');
+            showToast(`Loaded spool '${spool}'`, 'success');
+            validateCameraConnection();
+          });
+          
+          // Delete Button (Trashcan Icon)
+          const btnDelete = document.createElement('button');
+          btnDelete.className = 'btn-tactile-lg secondary';
+          btnDelete.style.margin = '0';
+          btnDelete.style.padding = '6px 10px';
+          btnDelete.style.width = 'auto';
+          btnDelete.style.display = 'flex';
+          btnDelete.style.alignItems = 'center';
+          btnDelete.style.justifyContent = 'center';
+          btnDelete.title = 'Delete Spool';
+          btnDelete.disabled = !isConnected;
+          if (!isConnected) {
+            btnDelete.style.opacity = '0.5';
+            btnDelete.style.cursor = 'not-allowed';
+          }
+          
+          // SVG Trashcan Icon
+          btnDelete.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          `;
+          
+          btnDelete.addEventListener('click', (e) => {
+            e.stopPropagation();
+            spoolToDelete = spool;
+            document.getElementById('delete-spool-name-label').textContent = spool.toUpperCase();
+            document.getElementById('spools-modal').classList.remove('active');
+            document.getElementById('confirm-delete-spool-modal').classList.add('active');
+          });
+          
+          actionsGroup.appendChild(btn);
+          actionsGroup.appendChild(btnDelete);
+          row.appendChild(label);
+          row.appendChild(actionsGroup);
+          container.appendChild(row);
+        });
+      });
+      
+      document.getElementById('btn-spools-close').addEventListener('click', () => {
+        document.getElementById('spools-modal').classList.remove('active');
+      });
+      document.getElementById('btn-spools-close-cross').addEventListener('click', () => {
+        document.getElementById('spools-modal').classList.remove('active');
       });
       
       // Viewer Back
