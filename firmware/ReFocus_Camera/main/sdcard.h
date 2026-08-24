@@ -58,4 +58,12 @@ esp_err_t sdcard_wipe_spool(const char *requested_name);
  */
 esp_err_t sdcard_delete_spool(const char *spool_name);
 
+/**
+ * @brief  Rename an archived spool folder from old_name to new_name.
+ * @param  old_name  Original directory name (e.g. "spool_monaco").
+ * @param  new_name  New directory name (will be sanitized and prepended with "spool_").
+ * @return ESP_OK on success.
+ */
+esp_err_t sdcard_rename_spool(const char *old_name, const char *new_name);
+
 

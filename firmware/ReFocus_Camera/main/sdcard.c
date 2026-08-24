@@ -504,3 +504,66 @@ esp_err_t sdcard_delete_spool(const char *spool_name)
     return ESP_OK;
 }
 
+esp_err_t sdcard_rename_spool(const char *old_name, const char *new_name)
+{
+    if (!old_name || old_name[0] == '\0' || !new_name || new_name[0] == '\0') {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    // Safety check: prevent directory traversal
+    if (strstr(old_name, "..") != NULL || strstr(new_name, "..") != NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    char old_path[256];
+    snprintf(old_path, sizeof(old_path), "/sdcard/developed/%s", old_name);
+    
+    // Sanitize and format new name
+    char folder_name[128] = {0};
+    const char *p = new_name;
+    if (strncasecmp(p, "spool_", 6) == 0) {
+        p += 6;
+    }
+    snprintf(folder_name, sizeof(folder_name), "spool_%s", p);
+    
+    /* Lowercase and sanitize spaces/special characters */
+    for (int i = 0; folder_name[i] != '\0'; i++) {
+        char c = folder_name[i];
+        if (c >= 'A' && c <= 'Z') {
+            folder_name[i] = c + 32;
+        } else if (c == ' ' || c == '-' || c == '/' || c == '\\') {
+            folder_name[i] = '_';
+        }
+    }
+    
+    char new_path[256];
+    snprintf(new_path, sizeof(new_path), "/sdcard/developed/%s", folder_name);
+    
+    // Collision check: if the target name already exists, append "_1", "_2", etc.
+    struct stat st;
+    int suffix = 1;
+    while (stat(new_path, &st) == 0) {
+        snprintf(folder_name, sizeof(folder_name), "spool_%s_%d", p, suffix);
+        // also sanitize this new name
+        for (int i = 0; folder_name[i] != '\0'; i++) {
+            char c = folder_name[i];
+            if (c >= 'A' && c <= 'Z') {
+                folder_name[i] = c + 32;
+            } else if (c == ' ' || c == '-' || c == '/' || c == '\\') {
+                folder_name[i] = '_';
+            }
+        }
+        snprintf(new_path, sizeof(new_path), "/sdcard/developed/%s", folder_name);
+        suffix++;
+    }
+    
+    ESP_LOGI(TAG, "Renaming spool folder from %s to %s", old_path, new_path);
+    if (rename(old_path, new_path) != 0) {
+        ESP_LOGE(TAG, "Failed to rename spool folder: %s -> %s", old_path, new_path);
+        return ESP_FAIL;
+    }
+    
+    return ESP_OK;
+}
+
+

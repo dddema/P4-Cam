@@ -1,6 +1,6 @@
 {
-  "name": "ESP32-P4 Cam interface",
-  "short_name": "DARKROOM",
+  "name": "ReFocus App",
+  "short_name": "ReFocus App",
   "description": "Offline PWA interface for the ESP32-P4 hardware camera with WebGL LUT filters",
   "start_url": "./",
   "display": "standalone",

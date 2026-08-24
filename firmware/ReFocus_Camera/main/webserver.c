@@ -514,6 +514,48 @@ static esp_err_t delete_spool_handler(httpd_req_t *req)
     }
 }
 
+/* ─── POST /api/spool/rename ───────────────────────────────────────── */
+static esp_err_t rename_spool_handler(httpd_req_t *req)
+{
+    add_cors(req);
+
+    char content[256] = {0};
+    int ret_len = httpd_req_recv(req, content, sizeof(content) - 1);
+    char old_name[64] = {0};
+    char new_name[64] = {0};
+
+    if (ret_len > 0) {
+        content[ret_len] = '\0';
+        cJSON *root = cJSON_Parse(content);
+        if (root) {
+            cJSON *old_item = cJSON_GetObjectItem(root, "old_name");
+            cJSON *new_item = cJSON_GetObjectItem(root, "new_name");
+            if (old_item && cJSON_IsString(old_item)) {
+                snprintf(old_name, sizeof(old_name), "%s", old_item->valuestring);
+            }
+            if (new_item && cJSON_IsString(new_item)) {
+                snprintf(new_name, sizeof(new_name), "%s", new_item->valuestring);
+            }
+            cJSON_Delete(root);
+        }
+    }
+
+    if (!old_name[0] || !new_name[0]) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Missing old_name or new_name");
+        return ESP_FAIL;
+    }
+
+    esp_err_t ret = sdcard_rename_spool(old_name, new_name);
+    if (ret == ESP_OK) {
+        httpd_resp_set_type(req, "application/json");
+        return httpd_resp_send(req, "{\"status\":\"ok\"}", 15);
+    } else {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Rename failed");
+        return ESP_FAIL;
+    }
+}
+
+
 
 /* ─── server lifecycle ──────────────────────────────────────────────── */
 esp_err_t webserver_start(void)
@@ -525,7 +567,7 @@ esp_err_t webserver_start(void)
 
     httpd_config_t cfg   = HTTPD_DEFAULT_CONFIG();
     cfg.stack_size       = 8192;
-    cfg.max_uri_handlers = 12;
+    cfg.max_uri_handlers = 14;
     cfg.uri_match_fn     = httpd_uri_match_wildcard;
 
     ESP_ERROR_CHECK(httpd_start(&s_server, &cfg));
@@ -617,6 +659,14 @@ esp_err_t webserver_start(void)
         .handler = delete_spool_handler,
     };
     httpd_register_uri_handler(s_server, &delete_spool_uri);
+
+    /* POST /api/spool/rename — rename an archived spool folder */
+    static const httpd_uri_t rename_spool_uri = {
+        .uri     = "/api/spool/rename",
+        .method  = HTTP_POST,
+        .handler = rename_spool_handler,
+    };
+    httpd_register_uri_handler(s_server, &rename_spool_uri);
 
     ESP_LOGI(TAG, "HTTP server started on port 80");
     return ESP_OK;
