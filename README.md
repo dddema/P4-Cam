@@ -1,4 +1,4 @@
-# P4_DARKROOM // WebGL Batch Film Darkroom
+# WebGL Batch Film Darkroom + Camera Firmware
 
 Repo for the WIP_NAME Camera. Webapp and firmware for the Hardware.
 
